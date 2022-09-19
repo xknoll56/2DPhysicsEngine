@@ -11,6 +11,12 @@ struct vec2
 		this->y = y;
 	}
 
+	vec2()
+	{
+		x = 0.0f;
+		y = 0.0f;
+	}
+
 	float mag()
 	{
 		return sqrtf(x * x + y * y);
@@ -23,10 +29,11 @@ struct vec2
 		y /= mag;
 	}
 
-	vec2& operator+=(const vec2& a)
+	vec2 operator+=(const vec2& a)
 	{
 		this->x += a.x;
 		this->y += a.y;
+		return *this;
 	}
 };
 

@@ -27,52 +27,52 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_KEYDOWN:
 	{
-		//if (!keys[wparam])
-		//	keysDown[wparam] = true;
-		//keys[wparam] = true;
+		if (!keys[wparam])
+			keysDown[wparam] = true;
+		keys[wparam] = true;
 		if (wparam == VK_ESCAPE)
 			DestroyWindow(hwnd);
 		break;
 }
 	case WM_KEYUP:
 	{
-		//keys[wparam] = false;
+		keys[wparam] = false;
 		break;
 	}
 	case WM_LBUTTONDOWN:
 	{
-		//if (!mouse[MOUSE_LEFT])
-		//	mouseDown[MOUSE_LEFT] = true;
-		//mouse[MOUSE_LEFT] = true;
+		if (!mouse[MOUSE_LEFT])
+			mouseDown[MOUSE_LEFT] = true;
+		mouse[MOUSE_LEFT] = true;
 		break;
 	}
 	case WM_LBUTTONUP:
 	{
-		//mouse[MOUSE_LEFT] = false;
+		mouse[MOUSE_LEFT] = false;
 		break;
 	}
 	case WM_RBUTTONDOWN:
 	{
-		//if (!mouse[MOUSE_RIGHT])
-		//	mouseDown[MOUSE_RIGHT] = true;
-		//mouse[MOUSE_RIGHT] = true;
+		if (!mouse[MOUSE_RIGHT])
+			mouseDown[MOUSE_RIGHT] = true;
+		mouse[MOUSE_RIGHT] = true;
 		break;
 	}
 	case WM_RBUTTONUP:
 	{
-		//mouse[MOUSE_RIGHT] = false;
+		mouse[MOUSE_RIGHT] = false;
 		break;
 	}
 	case WM_MBUTTONDOWN:
 	{
-		//if (!mouse[MOUSE_MIDDLE])
-		//	mouseDown[MOUSE_MIDDLE] = true;
-		//mouse[MOUSE_MIDDLE] = true;
+		if (!mouse[MOUSE_MIDDLE])
+			mouseDown[MOUSE_MIDDLE] = true;
+		mouse[MOUSE_MIDDLE] = true;
 		break;
 	}
 	case WM_MBUTTONUP:
 	{
-		//mouse[MOUSE_MIDDLE] = false;
+		mouse[MOUSE_MIDDLE] = false;
 		break;
 	}
 	case WM_MOUSELEAVE:
@@ -96,6 +96,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 
 float camWidth = 5;
+vec2 camPos;
 
 void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position, vec2 scale, float angle, RGBA color)
 {
@@ -104,7 +105,7 @@ void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 posi
 
 	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
 		D2D1::Matrix3x2F::Rotation(angle) *
-		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + position.x*modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - position.y*modifiedScale));
+		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (position.x-camPos.x)*modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - (position.y-camPos.y)*modifiedScale));
 
 	pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
 }
@@ -116,7 +117,7 @@ void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 posi
 
 	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
 		D2D1::Matrix3x2F::Rotation(angle) *
-		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + position.x * modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - position.y * modifiedScale));
+		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (position.x - camPos.x) * modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - (position.y - camPos.y) * modifiedScale));
 
 	if(fill)
 		pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
@@ -142,7 +143,7 @@ void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 p
 	float modifiedScale = radius / camWidth;
 	pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale, modifiedScale) *
 		D2D1::Matrix3x2F::Rotation(angle) *
-		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + pos.x * (0.5f / camWidth) * SCREEN_WIDTH, 0.5f * (FLOAT)SCREEN_HEIGHT - pos.y * (0.5f/camWidth)*SCREEN_WIDTH));
+		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (pos.x-camPos.x) * (0.5f / camWidth) * SCREEN_WIDTH, 0.5f * (FLOAT)SCREEN_HEIGHT - (pos.y-camPos.y) * (0.5f/camWidth)*SCREEN_WIDTH));
 
 	pRT->DrawEllipse(D2D1::Ellipse({ 0.0F, 0.0F }, SCREEN_WIDTH * 0.5F, SCREEN_WIDTH * 0.5F), pBrush, 5.0f);
 
@@ -246,6 +247,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		}
 		double currentTimeInSeconds = 0.0;
 
+		vec2 pos{ 1.0f, 1.0 };
+		camPos = { 1,1 };
 
 		bool running = true;
 		while (running)
@@ -281,13 +284,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 			float angle = 0.0f;
 			float radius = 0.5f;
-			vec2 pos{ 1.0f, 1.0 };
+
+			if (keys[KEY_W])
+				camPos += vec2(0, dt);
+			if (keys[KEY_A])
+				camPos += vec2(-dt, 0);
+			if (keys[KEY_S])
+				camPos += vec2(0, -dt);
+			if (keys[KEY_D])
+				camPos += vec2(dt, 0);
 
 			DrawBox(pRT, pBrush, pos, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
 
-			pos = { 0,0 };
 			pBrush->SetColor(D2D1::ColorF(0.0f, 0.0f, 1.0f, 1.0f));
-			DrawBox(pRT, pBrush, pos, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 0.0f, 1.0f, 1.0f });
+			DrawBox(pRT, pBrush, { 0,0 }, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 0.0f, 1.0f, 1.0f });
 
 			pBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f, 1.0f));
 			DrawCircle(pRT, pBrush, { 0,0 }, radius, angle, RGBA(1.0f, 0.0f, 0.0f, 1.0f));
