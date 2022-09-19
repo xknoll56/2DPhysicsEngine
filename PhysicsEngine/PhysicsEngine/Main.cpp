@@ -137,20 +137,33 @@ vec2 operator*(float f, vec2 a)
 	return a;
 }
 
+float camWidth = 5;
+
 void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 position, vec2 scale, float angle)
 {
-	float camWidth = 5;
-	vec2 modifiedScale{ scale.x / camWidth, scale.y / camWidth * (FLOAT)SCREEN_WIDTH / SCREEN_HEIGHT };
+	
+	float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
 
-	pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale.x, modifiedScale.y) *
-		D2D1::Matrix3x2F::Rotation(angle, { (FLOAT)SCREEN_WIDTH * modifiedScale.x* 0.5f,SCREEN_HEIGHT * modifiedScale.y* 0.5f }) *
-		D2D1::Matrix3x2F::Translation(0.5f* (FLOAT)SCREEN_WIDTH*(1-modifiedScale.x), 0.5f* (FLOAT)SCREEN_HEIGHT*(1- modifiedScale.y)));
+	//pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale.x, modifiedScale.y) *
+	//	D2D1::Matrix3x2F::Rotation(angle, { (FLOAT)SCREEN_WIDTH * modifiedScale.x* 0.5f,SCREEN_HEIGHT * modifiedScale.y* 0.5f }) *
+	//	D2D1::Matrix3x2F::Translation(0.5f* (FLOAT)SCREEN_WIDTH*(1-modifiedScale.x), 0.5f* (FLOAT)SCREEN_HEIGHT*(1- modifiedScale.y)));
 
-	pRT->FillRectangle(D2D1::RectF(rc.left, rc.top, rc.right, rc.bottom), pBrush);
+	
+	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
+		D2D1::Matrix3x2F::Rotation(angle) *
+		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + position.x*modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - position.y*modifiedScale));
+
+	pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
 }
 
-void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 position, float radius, float angle)
+void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 pos, float radius, float angle)
 {
+	float modifiedScale = radius / camWidth;
+	pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale, modifiedScale) *
+		D2D1::Matrix3x2F::Rotation(angle) *
+		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + pos.x * (0.5f / camWidth) * SCREEN_WIDTH, 0.5f * (FLOAT)SCREEN_HEIGHT - pos.y * (0.5f/camWidth)*SCREEN_WIDTH));
+
+	pRT->DrawEllipse(D2D1::Ellipse({ 0.0F, 0.0F }, SCREEN_WIDTH * 0.5F, SCREEN_WIDTH * 0.5F), pBrush, 5.0f);
 
 }
 
@@ -247,11 +260,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			}
 
 			pRT->BeginDraw();
+			float angle = 0.0f;
+			float radius = 0.5f;
+			vec2 pos{ 1.0f, 1.0 };
 
-			//DrawBox(pRT, pBrush, rc, { 0,0 }, { 1, 1 }, 45.0f);
+			pBrush->SetColor(D2D1::ColorF(0.0f, 1.0f, 0.0f, 1.0f));
+			DrawBox(pRT, pBrush, rc, pos, { 0.5f,0.5f }, angle);
 
-			pRT->DrawEllipse(D2D1::Ellipse({ 0,0 }, 100, 100), pBrush, 5.0f);
+			pos = { 0,0 };
+			pBrush->SetColor(D2D1::ColorF(0.0f, 0.0f, 1.0f, 1.0f));
+			DrawBox(pRT, pBrush, rc, pos, { 0.5f,0.5f }, angle);
 
+			pBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f, 1.0f));
+			DrawCircle(pRT, pBrush, rc, { 0,0 }, radius, angle);
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
 				std::cout << "Failed to draw" << std::endl;
