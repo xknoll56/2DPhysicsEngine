@@ -1,3 +1,7 @@
 ﻿  Main.cpp
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(281): warning C4715: 'WinMain': not all control paths return a value
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(246,30): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(246,30): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(246,44): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(246,44): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(332): warning C4715: 'WinMain': not all control paths return a value
   PhysicsEngine.vcxproj -> C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\x64\Debug\PhysicsEngine.exe

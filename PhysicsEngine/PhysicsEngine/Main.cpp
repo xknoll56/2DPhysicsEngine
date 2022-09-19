@@ -10,8 +10,8 @@ typedef unsigned long uint64;
 typedef short int16;
 typedef unsigned short uint16;
 
-#define SCREEN_WIDTH 1024
-#define SCREEN_HEIGHT 576
+float SCREEN_WIDTH = 1024;
+float SCREEN_HEIGHT = 576;
 #define DEBUG_BUILD
 float aspect;
 
@@ -92,6 +92,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return result;
 }
 
+#include <math.h>
 struct vec2
 {
 	float x, y;
@@ -100,6 +101,18 @@ struct vec2
 	{
 		this->x = x;
 		this->y = y;
+	}
+
+	float mag()
+	{
+		return sqrtf(x * x + y * y);
+	}
+
+	void normalize()
+	{
+		float mag = this->mag();
+		x /= mag;
+		y /= mag;
 	}
 	
 	vec2& operator+=(const vec2& a)
@@ -137,18 +150,26 @@ vec2 operator*(float f, vec2 a)
 	return a;
 }
 
+struct RGBA
+{
+	float r, g, b, a;
+
+	RGBA(float r, float g, float b, float a)
+	{
+		this->r = r;
+		this->g = g;
+		this->b = b;
+		this->a = a;
+	}
+};
+
 float camWidth = 5;
 
-void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 position, vec2 scale, float angle)
+void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position, vec2 scale, float angle, RGBA color)
 {
-	
+	pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
 	float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
 
-	//pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale.x, modifiedScale.y) *
-	//	D2D1::Matrix3x2F::Rotation(angle, { (FLOAT)SCREEN_WIDTH * modifiedScale.x* 0.5f,SCREEN_HEIGHT * modifiedScale.y* 0.5f }) *
-	//	D2D1::Matrix3x2F::Translation(0.5f* (FLOAT)SCREEN_WIDTH*(1-modifiedScale.x), 0.5f* (FLOAT)SCREEN_HEIGHT*(1- modifiedScale.y)));
-
-	
 	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
 		D2D1::Matrix3x2F::Rotation(angle) *
 		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + position.x*modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - position.y*modifiedScale));
@@ -156,8 +177,36 @@ void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, 
 	pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
 }
 
-void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 pos, float radius, float angle)
+void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position, vec2 scale, float angle, bool fill, RGBA color)
 {
+	pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
+	float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
+
+	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
+		D2D1::Matrix3x2F::Rotation(angle) *
+		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + position.x * modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - position.y * modifiedScale));
+
+	if(fill)
+		pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
+	else
+		pRT->DrawRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
+}
+
+void DrawLine(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position1, vec2 position2, float yScale, bool fill, RGBA color)
+{
+	vec2 dp = position2 - position1;
+	float len = dp.mag() *0.5f;
+	dp.normalize();
+
+	vec2 mid = (position2 + position1) * 0.5f;
+	float theta = atanf(-dp.y / dp.x)*57.29577f;
+	DrawBox(pRT, pBrush, mid, {len, yScale}, theta, color);
+
+}
+
+void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 pos, float radius, float angle, RGBA color)
+{
+	pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
 	float modifiedScale = radius / camWidth;
 	pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale, modifiedScale) *
 		D2D1::Matrix3x2F::Rotation(angle) *
@@ -264,15 +313,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			float radius = 0.5f;
 			vec2 pos{ 1.0f, 1.0 };
 
-			pBrush->SetColor(D2D1::ColorF(0.0f, 1.0f, 0.0f, 1.0f));
-			DrawBox(pRT, pBrush, rc, pos, { 0.5f,0.5f }, angle);
+			DrawBox(pRT, pBrush, pos, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
 
 			pos = { 0,0 };
 			pBrush->SetColor(D2D1::ColorF(0.0f, 0.0f, 1.0f, 1.0f));
-			DrawBox(pRT, pBrush, rc, pos, { 0.5f,0.5f }, angle);
+			DrawBox(pRT, pBrush, pos, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 0.0f, 1.0f, 1.0f });
 
 			pBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f, 1.0f));
-			DrawCircle(pRT, pBrush, rc, { 0,0 }, radius, angle);
+			DrawCircle(pRT, pBrush, { 0,0 }, radius, angle, RGBA(1.0f, 0.0f, 0.0f, 1.0f));
+
+			DrawLine(pRT, pBrush, { 0,0 }, { 1, -1 }, 0.005f, true, { 1,0,0,1 });
+
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
 				std::cout << "Failed to draw" << std::endl;
