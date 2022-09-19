@@ -1,6 +1,8 @@
 #include <iostream>
 #include <Windows.h>
 #include <d2d1.h>
+#include "vec.h"
+#include "Input.h"
 
 typedef int int32;
 typedef unsigned int uint32;
@@ -92,76 +94,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	return result;
 }
 
-#include <math.h>
-struct vec2
-{
-	float x, y;
-
-	vec2(float x, float y)
-	{
-		this->x = x;
-		this->y = y;
-	}
-
-	float mag()
-	{
-		return sqrtf(x * x + y * y);
-	}
-
-	void normalize()
-	{
-		float mag = this->mag();
-		x /= mag;
-		y /= mag;
-	}
-	
-	vec2& operator+=(const vec2& a)
-	{
-		this->x += a.x;
-		this->y += a.y;
-	}
-};
-
-vec2 operator+(vec2 a, vec2 b)
-{
-	a.x += b.x;
-	a.y += b.y;
-	return a;
-}
-
-vec2 operator-(vec2 a, vec2 b)
-{
-	a.x -= b.x;
-	a.y -= b.y;
-	return a;
-}
-
-vec2 operator*(vec2 a, float f)
-{
-	a.x *= f;
-	a.y *= f;
-	return a;
-}
-
-vec2 operator*(float f, vec2 a)
-{
-	a.x *= f;
-	a.y *= f;
-	return a;
-}
-
-struct RGBA
-{
-	float r, g, b, a;
-
-	RGBA(float r, float g, float b, float a)
-	{
-		this->r = r;
-		this->g = g;
-		this->b = b;
-		this->a = a;
-	}
-};
 
 float camWidth = 5;
 
@@ -295,10 +227,42 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			);
 		}
 
+		//clear the inputs
+		memset(keys, false, INPUT_SIZE);
+		memset(keysDown, false, INPUT_SIZE);
+		memset(mouse, false, MOUSE_SIZE);
+		memset(mouseDown, false, MOUSE_SIZE);
+
+		// Timing
+		LONGLONG startPerfCount = 0;
+		LONGLONG perfCounterFrequency = 0;
+		{
+			LARGE_INTEGER perfCount;
+			QueryPerformanceCounter(&perfCount);
+			startPerfCount = perfCount.QuadPart;
+			LARGE_INTEGER perfFreq;
+			QueryPerformanceFrequency(&perfFreq);
+			perfCounterFrequency = perfFreq.QuadPart;
+		}
+		double currentTimeInSeconds = 0.0;
+
 
 		bool running = true;
 		while (running)
 		{
+			//calculate delta time
+			float dt;
+			{
+				double previousTimeInSeconds = currentTimeInSeconds;
+				LARGE_INTEGER perfCount;
+				QueryPerformanceCounter(&perfCount);
+
+				currentTimeInSeconds = (double)(perfCount.QuadPart - startPerfCount) / (double)perfCounterFrequency;
+				dt = (float)(currentTimeInSeconds - previousTimeInSeconds);
+				//if (dt > (1.f / 60.f))
+				//	dt = (1.f / 60.f);
+			}
+
 			MSG msg = {};
 			while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
 			{
@@ -308,7 +272,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 				DispatchMessageW(&msg);
 			}
 
+			//reset input downs
+			memset(keysDown, false, INPUT_SIZE);
+			memset(mouseDown, false, MOUSE_SIZE);
+
 			pRT->BeginDraw();
+			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
+
 			float angle = 0.0f;
 			float radius = 0.5f;
 			vec2 pos{ 1.0f, 1.0 };
@@ -322,7 +292,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			pBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f, 1.0f));
 			DrawCircle(pRT, pBrush, { 0,0 }, radius, angle, RGBA(1.0f, 0.0f, 0.0f, 1.0f));
 
-			DrawLine(pRT, pBrush, { 0,0 }, { 1, -1 }, 0.005f, true, { 1,0,0,1 });
+			DrawLine(pRT, pBrush, { 0,0 }, { cosf(currentTimeInSeconds), sinf(currentTimeInSeconds)}, 0.005f, true, {1,0,0,1});
 
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
