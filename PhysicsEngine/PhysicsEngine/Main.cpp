@@ -1,0 +1,260 @@
+#include <iostream>
+#include <Windows.h>
+#include <d2d1.h>
+
+typedef int int32;
+typedef unsigned int uint32;
+typedef float f32;
+typedef long int64;
+typedef unsigned long uint64;
+typedef short int16;
+typedef unsigned short uint16;
+
+#define SCREEN_WIDTH 1024
+#define SCREEN_HEIGHT 576
+#define DEBUG_BUILD
+float aspect;
+
+HWND hwnd;
+
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	LRESULT result = 0;
+	switch (msg)
+	{
+	case WM_KEYDOWN:
+	{
+		//if (!keys[wparam])
+		//	keysDown[wparam] = true;
+		//keys[wparam] = true;
+		if (wparam == VK_ESCAPE)
+			DestroyWindow(hwnd);
+		break;
+}
+	case WM_KEYUP:
+	{
+		//keys[wparam] = false;
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		//if (!mouse[MOUSE_LEFT])
+		//	mouseDown[MOUSE_LEFT] = true;
+		//mouse[MOUSE_LEFT] = true;
+		break;
+	}
+	case WM_LBUTTONUP:
+	{
+		//mouse[MOUSE_LEFT] = false;
+		break;
+	}
+	case WM_RBUTTONDOWN:
+	{
+		//if (!mouse[MOUSE_RIGHT])
+		//	mouseDown[MOUSE_RIGHT] = true;
+		//mouse[MOUSE_RIGHT] = true;
+		break;
+	}
+	case WM_RBUTTONUP:
+	{
+		//mouse[MOUSE_RIGHT] = false;
+		break;
+	}
+	case WM_MBUTTONDOWN:
+	{
+		//if (!mouse[MOUSE_MIDDLE])
+		//	mouseDown[MOUSE_MIDDLE] = true;
+		//mouse[MOUSE_MIDDLE] = true;
+		break;
+	}
+	case WM_MBUTTONUP:
+	{
+		//mouse[MOUSE_MIDDLE] = false;
+		break;
+	}
+	case WM_MOUSELEAVE:
+	{
+	}
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		break;
+	}
+	case WM_SIZE:
+	{
+		//global_windowDidResize = true;
+		break;
+	}
+	default:
+		result = DefWindowProcW(hwnd, msg, wparam, lparam);
+	}
+	return result;
+}
+
+struct vec2
+{
+	float x, y;
+
+	vec2(float x, float y)
+	{
+		this->x = x;
+		this->y = y;
+	}
+	
+	vec2& operator+=(const vec2& a)
+	{
+		this->x += a.x;
+		this->y += a.y;
+	}
+};
+
+vec2 operator+(vec2 a, vec2 b)
+{
+	a.x += b.x;
+	a.y += b.y;
+	return a;
+}
+
+vec2 operator-(vec2 a, vec2 b)
+{
+	a.x -= b.x;
+	a.y -= b.y;
+	return a;
+}
+
+vec2 operator*(vec2 a, float f)
+{
+	a.x *= f;
+	a.y *= f;
+	return a;
+}
+
+vec2 operator*(float f, vec2 a)
+{
+	a.x *= f;
+	a.y *= f;
+	return a;
+}
+
+void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 position, vec2 scale, float angle)
+{
+	float camWidth = 5;
+	vec2 modifiedScale{ scale.x / camWidth, scale.y / camWidth * (FLOAT)SCREEN_WIDTH / SCREEN_HEIGHT };
+
+	pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale.x, modifiedScale.y) *
+		D2D1::Matrix3x2F::Rotation(angle, { (FLOAT)SCREEN_WIDTH * modifiedScale.x* 0.5f,SCREEN_HEIGHT * modifiedScale.y* 0.5f }) *
+		D2D1::Matrix3x2F::Translation(0.5f* (FLOAT)SCREEN_WIDTH*(1-modifiedScale.x), 0.5f* (FLOAT)SCREEN_HEIGHT*(1- modifiedScale.y)));
+
+	pRT->FillRectangle(D2D1::RectF(rc.left, rc.top, rc.right, rc.bottom), pBrush);
+}
+
+void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, RECT rc, vec2 position, float radius, float angle)
+{
+
+}
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nShowCmd*/)
+{
+
+#ifdef DEBUG_BUILD
+	AllocConsole();
+	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);
+	std::cout << "Console Setup Complete.\n";
+#endif
+
+	// Open a window
+
+	{
+		WNDCLASSEXW winClass = {};
+		winClass.cbSize = sizeof(WNDCLASSEXW);
+		winClass.style = CS_HREDRAW | CS_VREDRAW;
+		winClass.lpfnWndProc = &WndProc;
+		winClass.hInstance = hInstance;
+		winClass.hIcon = LoadIconW(0, IDI_APPLICATION);
+		winClass.hCursor = LoadCursorW(0, IDC_ARROW);
+		winClass.lpszClassName = L"MyWindowClass";
+		winClass.hIconSm = LoadIconW(0, IDI_APPLICATION);
+
+		if (!RegisterClassExW(&winClass)) {
+			MessageBoxA(0, "RegisterClassEx failed", "Fatal Error", MB_OK);
+			return GetLastError();
+		}
+
+		RECT initialRect = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
+		AdjustWindowRectEx(&initialRect, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_OVERLAPPEDWINDOW);
+		LONG initialWidth = initialRect.right - initialRect.left;
+		LONG initialHeight = initialRect.bottom - initialRect.top;
+
+		hwnd = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW,
+			winClass.lpszClassName,
+			L"Engine",
+			WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+			CW_USEDEFAULT, CW_USEDEFAULT,
+			initialWidth,
+			initialHeight,
+			0, 0, hInstance, 0);
+
+		if (!hwnd) {
+			MessageBoxA(0, "CreateWindowEx failed", "Fatal Error", MB_OK);
+			return GetLastError();
+		}
+
+		ID2D1Factory* pD2DFactory = NULL;
+		HRESULT hr = D2D1CreateFactory(
+			D2D1_FACTORY_TYPE_SINGLE_THREADED,
+			&pD2DFactory
+		);
+
+		// Obtain the size of the drawing area.
+		RECT rc;
+		GetClientRect(hwnd, &rc);
+
+		// Create a Direct2D render target          
+		ID2D1HwndRenderTarget* pRT = NULL;
+		hr = pD2DFactory->CreateHwndRenderTarget(
+			D2D1::RenderTargetProperties(),
+			D2D1::HwndRenderTargetProperties(
+				hwnd,
+				D2D1::SizeU(
+					rc.right - rc.left,
+					rc.bottom - rc.top)
+			),
+			&pRT
+		);
+
+		ID2D1SolidColorBrush* pBrush = NULL;
+		if (SUCCEEDED(hr))
+		{
+
+			pRT->CreateSolidColorBrush(
+				D2D1::ColorF(D2D1::ColorF::Green),
+				&pBrush
+			);
+		}
+
+
+		bool running = true;
+		while (running)
+		{
+			MSG msg = {};
+			while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE))
+			{
+				if (msg.message == WM_QUIT)
+					running = false;
+				TranslateMessage(&msg);
+				DispatchMessageW(&msg);
+			}
+
+			pRT->BeginDraw();
+
+			//DrawBox(pRT, pBrush, rc, { 0,0 }, { 1, 1 }, 45.0f);
+
+			pRT->DrawEllipse(D2D1::Ellipse({ 0,0 }, 100, 100), pBrush, 5.0f);
+
+			HRESULT hr = pRT->EndDraw();
+			if (!SUCCEEDED(hr))
+				std::cout << "Failed to draw" << std::endl;
+		}
+	}
+}

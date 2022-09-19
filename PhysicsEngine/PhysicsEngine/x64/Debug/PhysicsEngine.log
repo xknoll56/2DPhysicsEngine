@@ -1,0 +1,7 @@
+﻿  Main.cpp
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(149,62): warning C4244: 'argument': conversion from 'LONG' to 'FLOAT', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(149,52): warning C4244: 'argument': conversion from 'LONG' to 'FLOAT', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(149,44): warning C4244: 'argument': conversion from 'LONG' to 'FLOAT', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(149,35): warning C4244: 'argument': conversion from 'LONG' to 'FLOAT', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(255): warning C4715: 'WinMain': not all control paths return a value
+  PhysicsEngine.vcxproj -> C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\x64\Debug\PhysicsEngine.exe
