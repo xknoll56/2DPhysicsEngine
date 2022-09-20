@@ -27,8 +27,6 @@ struct Quadrant
 			Quadrant q;
 			children.push_back(&q);
 		}
-		set = true;
-		rigidBodies.reserve(100);
 	}
 
 	Quadrant()
@@ -41,6 +39,7 @@ struct Quadrant
 	vec2 topRightExtent;
 	vec2 bottomRightExtent;
 	bool set = false;
+#define MAX_SUBS 10000
 	
 
 	std::vector<Quadrant*> children;
@@ -65,7 +64,7 @@ struct QuadTree
 	void subdivideAllQuadrant(Quadrant* quadrant)
 	{
 		vec2 halfHalfExtents =  0.5f*quadrant->halfExtents;
-
+		
 		Quadrant q((quadrant->position + quadrant->bottomLeftExtent) * 0.5f, halfHalfExtents);
 		quadrants.push_back(q);
 		quadrant->children[0] = &quadrants[quadrants.size() - 1];
@@ -85,9 +84,9 @@ struct QuadTree
 
 	bool pointIsInQuadrant(Quadrant& q, vec2 point)
 	{
-		if (point.x >= q.bottomLeftExtent.x && point.x <= q.topRightExtent.x)
+		if (point.x >= q.bottomLeftExtent.x && point.x < q.topRightExtent.x)
 		{
-			if (point.y >= q.bottomLeftExtent.y && point.y <= q.topRightExtent.y)
+			if (point.y >= q.bottomLeftExtent.y && point.y < q.topRightExtent.y)
 				return true;
 		}
 
@@ -100,22 +99,41 @@ struct QuadTree
 		{
 			return;
 		}
-		if (q->rigidBodies.size() == 0)
+		bool samePos = false;
+		for (int i = 0; i < q->rigidBodies.size(); i++)
+		{
+			if (q->rigidBodies[i]->position == rb->position)
+			{
+				samePos = true;
+				break;
+			}
+		}
+		if (q->rigidBodies.size()==0 || samePos)
 		{
 			q->rigidBodies.push_back(rb);
 		}
 		else
 		{
-			subdivideAllQuadrant(q);
-			for (int i = 0; i < 4; i++)
+			if (!q->set)
+			{
+				subdivideAllQuadrant(q);
+				q->set = true;
+			}
+
+			for (int i = 0; i < q->children.size(); i++)
 			{
 				Quadrant* child = q->children[i];
 				insert(child, rb);
 				for (int i = 0; i < q->rigidBodies.size(); i++)
 				{
-						insert(child, q->rigidBodies[i]);
+					insert(child, q->rigidBodies[i]);
 				}
 			}
 		}
+	}
+
+	RigidBody* get(Quadrant* root)
+	{
+
 	}
 };

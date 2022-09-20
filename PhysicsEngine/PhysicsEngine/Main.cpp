@@ -257,13 +257,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		//tree.subdivideAllQuadrant(&root);
 		//tree.subdivideAllQuadrant(&tree.quadrants[0]);
 		std::vector<RigidBody> rbs;
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 100; i++)
 		{
 			float x = rand() % 100 / 10;
 			float y = rand() % 100 / 10;
 			rbs.push_back(RigidBody());
 			rbs.at(rbs.size() - 1).position = { x, y };
 		}
+		//RigidBody rb1;
+		//RigidBody rb2;
+		//rb1.position = { 0,0 };
+		//rb2.position = { 0,0 };
+		//rbs.push_back(rb1);
+		//rbs.push_back(rb2);
 
 		for (int i = 0; i < rbs.size(); i++)
 		{
