@@ -39,7 +39,6 @@ struct Quadrant
 	vec2 topRightExtent;
 	vec2 bottomRightExtent;
 	bool set = false;
-#define MAX_SUBS 10000
 	
 
 	std::vector<Quadrant*> children;
@@ -110,7 +109,10 @@ struct QuadTree
 		}
 		if (q->rigidBodies.size()==0 || samePos)
 		{
-			q->rigidBodies.push_back(rb);
+			if (std::find(q->rigidBodies.begin(), q->rigidBodies.end(), rb) == q->rigidBodies.end())
+				q->rigidBodies.push_back(rb);
+			else
+				std::cout << "already added" << std::endl;
 		}
 		else
 		{
@@ -132,8 +134,5 @@ struct QuadTree
 		}
 	}
 
-	RigidBody* get(Quadrant* root)
-	{
-
-	}
+	
 };
