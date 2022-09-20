@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include <d2d1.h>
 #include "vec.h"
+#include "QuadTree.h"
 #include "Input.h"
 
 typedef int int32;
@@ -95,7 +96,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 
-float camWidth = 5;
+float camWidth = 10;
 vec2 camPos;
 
 void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position, vec2 scale, float angle, RGBA color)
@@ -249,6 +250,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 		vec2 pos{ 1.0f, 1.0 };
 		camPos = { 1,1 };
+		QuadTree tree;
+		Quadrant root({ 0,0 }, { 5, 5 });
+		tree.root = &root;
+		tree.subdivideAllQuadrant(&root);
 
 		bool running = true;
 		while (running)
@@ -286,15 +291,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			float radius = 0.5f;
 
 			if (keys[KEY_W])
-				camPos += vec2(0, dt);
+				camPos += vec2(0, 5.0f*dt);
 			if (keys[KEY_A])
-				camPos += vec2(-dt, 0);
+				camPos += vec2(-5.0f * dt, 0);
 			if (keys[KEY_S])
-				camPos += vec2(0, -dt);
+				camPos += vec2(0, -5.0f * dt);
 			if (keys[KEY_D])
-				camPos += vec2(dt, 0);
+				camPos += vec2(5.0f * dt, 0);
 
-			DrawBox(pRT, pBrush, pos, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
+			for(int i = 0; i<tree.quadrants.size();i++)
+				DrawBox(pRT, pBrush, tree.quadrants[i].position, tree.quadrants[i].halfExtents * 2.0f, angle, false, RGBA{0.0f, 1.0f, 0.0f, 1.0f});
 
 			pBrush->SetColor(D2D1::ColorF(0.0f, 0.0f, 1.0f, 1.0f));
 			DrawBox(pRT, pBrush, { 0,0 }, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 0.0f, 1.0f, 1.0f });
