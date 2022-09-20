@@ -1,9 +1,9 @@
 ﻿  Main.cpp
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(180,30): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(180,30): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(180,44): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(180,44): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(311,42): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(311,70): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(318): warning C4715: 'WinMain': not all control paths return a value
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,30): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,30): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,44): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,44): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(262,12): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(263,12): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(334): warning C4715: 'WinMain': not all control paths return a value
   PhysicsEngine.vcxproj -> C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\x64\Debug\PhysicsEngine.exe

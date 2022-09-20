@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <d2d1.h>
+#include <random>
 #include "vec.h"
 #include "QuadTree.h"
 #include "Input.h"
@@ -146,7 +147,7 @@ void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 p
 		D2D1::Matrix3x2F::Rotation(angle) *
 		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (pos.x-camPos.x) * (0.5f / camWidth) * SCREEN_WIDTH, 0.5f * (FLOAT)SCREEN_HEIGHT - (pos.y-camPos.y) * (0.5f/camWidth)*SCREEN_WIDTH));
 
-	pRT->DrawEllipse(D2D1::Ellipse({ 0.0F, 0.0F }, SCREEN_WIDTH * 0.5F, SCREEN_WIDTH * 0.5F), pBrush, 5.0f);
+	pRT->FillEllipse(D2D1::Ellipse({ 0.0F, 0.0F}, SCREEN_WIDTH * 0.5F, SCREEN_WIDTH * 0.5F), pBrush);
 
 }
 
@@ -251,10 +252,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		vec2 pos{ 1.0f, 1.0 };
 		camPos = { 1,1 };
 		QuadTree tree;
-		Quadrant root({ 0,0 }, { 5, 5 });
+		Quadrant root({ 0,0 }, { 10, 10 });
 		tree.root = &root;
-		tree.subdivideAllQuadrant(&root);
+		//tree.subdivideAllQuadrant(&root);
+		//tree.subdivideAllQuadrant(&tree.quadrants[0]);
+		std::vector<RigidBody> rbs;
+		for (int i = 0; i < 6; i++)
+		{
+			float x = rand() % 100 / 10;
+			float y = rand() % 100 / 10;
+			rbs.push_back(RigidBody());
+			rbs.at(rbs.size() - 1).position = { x, y };
+		}
 
+		for (int i = 0; i < rbs.size(); i++)
+		{
+			tree.insert(&root, &rbs.at(i));
+		}
 		bool running = true;
 		while (running)
 		{
@@ -300,15 +314,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 				camPos += vec2(5.0f * dt, 0);
 
 			for(int i = 0; i<tree.quadrants.size();i++)
-				DrawBox(pRT, pBrush, tree.quadrants[i].position, tree.quadrants[i].halfExtents * 2.0f, angle, false, RGBA{0.0f, 1.0f, 0.0f, 1.0f});
+				DrawBox(pRT, pBrush, tree.quadrants[i].position, tree.quadrants[i].halfExtents, angle, false, RGBA{0.0f, 1.0f, 0.0f, 1.0f});
+			//for (int i = -10; i <= 0; i++)
+			//	DrawBox(pRT, pBrush, { (float)i,(float)i }, { 0.5,0.5f }, 0, { 1,0,0,1 });
+			DrawBox(pRT, pBrush, root.position, root.halfExtents, angle, false, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
+			//DrawBox(pRT, pBrush, { -2.5,-2.5 }, { 7.5, 7.5 }, angle, false, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
 
-			pBrush->SetColor(D2D1::ColorF(0.0f, 0.0f, 1.0f, 1.0f));
-			DrawBox(pRT, pBrush, { 0,0 }, { 0.5f,0.5f }, angle, RGBA{ 0.0f, 0.0f, 1.0f, 1.0f });
-
-			pBrush->SetColor(D2D1::ColorF(1.0f, 0.0f, 0.0f, 1.0f));
-			DrawCircle(pRT, pBrush, { 0,0 }, radius, angle, RGBA(1.0f, 0.0f, 0.0f, 1.0f));
-
-			DrawLine(pRT, pBrush, { 0,0 }, { cosf(currentTimeInSeconds), sinf(currentTimeInSeconds)}, 0.005f, true, {1,0,0,1});
+			for (int i = 0; i < rbs.size(); i++)
+			{
+				RigidBody rb = rbs.at(i);
+				DrawCircle(pRT, pBrush, rb.position, 0.25f, 0, { 1, 0, 0, 1 });
+			}
 
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
