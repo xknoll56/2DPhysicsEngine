@@ -26,6 +26,7 @@ struct Quadrant
 		{
 			Quadrant q;
 			children.push_back(&q);
+			parent = this;
 		}
 	}
 
@@ -121,12 +122,13 @@ struct QuadTree
 				q->set = true;
 			}
 
-			for (int i = 0; i < q->children.size(); i++)
+			QuadrantLocation qlChild = quadrantizePoint(q, rb->position);
+			insert(q->children[(int)qlChild], rb);
+
+			if (q->rigidBody != nullptr)
 			{
-				Quadrant* child = q->children[i];
-				insert(child, rb);
-				if (q->rigidBody != nullptr)
-					insert(child, q->rigidBody);
+				QuadrantLocation qlChild1 = quadrantizePoint(q, q->rigidBody->position);
+				insert(q->children[(int)qlChild1], q->rigidBody);
 			}
 		}
 
@@ -151,6 +153,7 @@ struct QuadTree
 
 		return (QuadrantLocation)ret;
 	}
+
 
 
 	//void remove(RigidBody* rb, Quadrant* root)
