@@ -41,6 +41,7 @@ struct Quadrant
 	bool set = false;
 	
 
+	Quadrant* parent = nullptr;
 	std::vector<Quadrant*> children;
 	std::vector<RigidBody*> rigidBodies;
 };
@@ -48,6 +49,7 @@ struct Quadrant
 struct QuadTree
 {
 	Quadrant* root;
+	Quadrant* outside;
 	std::vector<Quadrant> quadrants;
 
 	QuadTree()
@@ -68,17 +70,19 @@ struct QuadTree
 		quadrants.push_back(q);
 		quadrant->children[0] = &quadrants[quadrants.size() - 1];
 
-		Quadrant q1((quadrant->position + quadrant->topLeftExtent) * 0.5f, halfHalfExtents);
+		Quadrant q1((quadrant->position + quadrant->bottomRightExtent) * 0.5f, halfHalfExtents);
 		quadrants.push_back(q1);
 		quadrant->children[1] = &quadrants[quadrants.size() - 1];
 
-		Quadrant q2((quadrant->position + quadrant->topRightExtent) * 0.5f, halfHalfExtents);
+		Quadrant q2((quadrant->position + quadrant->topLeftExtent) * 0.5f, halfHalfExtents);
 		quadrants.push_back(q2);
 		quadrant->children[2] = &quadrants[quadrants.size() - 1];
 
-		Quadrant q3((quadrant->position + quadrant->bottomRightExtent) * 0.5f, halfHalfExtents);
+		Quadrant q3((quadrant->position + quadrant->topRightExtent) * 0.5f, halfHalfExtents);
 		quadrants.push_back(q3);
 		quadrant->children[3] = &quadrants[quadrants.size() - 1];
+
+
 	}
 
 	bool pointIsInQuadrant(Quadrant& q, vec2 point)
@@ -111,8 +115,6 @@ struct QuadTree
 		{
 			if (std::find(q->rigidBodies.begin(), q->rigidBodies.end(), rb) == q->rigidBodies.end())
 				q->rigidBodies.push_back(rb);
-			else
-				std::cout << "already added" << std::endl;
 		}
 		else
 		{
@@ -134,5 +136,33 @@ struct QuadTree
 		}
 	}
 
-	
+	enum QuadrantLocation
+	{
+		bottomLeft = 0,
+		bottomRight = 1,
+		topLeft = 2,
+		topRight = 3
+	};
+
+	QuadrantLocation quadrantizePoint(Quadrant* q, vec2 point)
+	{
+		int ret = 0b00;
+		if (point.x >= q->position.x)
+			ret |= 0b01;
+		if (point.y >= q->position.y)
+			ret |= 0b10;
+
+		return (QuadrantLocation)ret;
+	}
+
+
+	void remove(RigidBody* rb, Quadrant* root)
+	{
+		if (std::find(root->rigidBodies.begin(), root->rigidBodies.end(), rb) != root->rigidBodies.end())
+		{
+			std::remove(root->rigidBodies.begin(), root->rigidBodies.end(), rb);
+			QuadrantLocation loc = quadrantizePoint(root, rb->position);
+			remove(rb, root->children[(int)loc]);
+		}
+	}
 };

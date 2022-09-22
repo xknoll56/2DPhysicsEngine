@@ -259,22 +259,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		std::vector<RigidBody> rbs;
 		for (int i = 0; i < 100; i++)
 		{
-			float x = rand() % 100 / 10;
-			float y = rand() % 100 / 10;
+			float x = rand() % 100 / 5 - 10;
+			float y = rand() % 100 / 5 - 10;
 			rbs.push_back(RigidBody());
 			rbs.at(rbs.size() - 1).position = { x, y };
 		}
-		//RigidBody rb1;
-		//RigidBody rb2;
-		//rb1.position = { 0,0 };
+		RigidBody rb1;
+		RigidBody rb2;
+		rb1.position = { 1,1 };
 		//rb2.position = { 0,0 };
-		//rbs.push_back(rb1);
+		rbs.push_back(rb1);
 		//rbs.push_back(rb2);
 
 		for (int i = 0; i < rbs.size(); i++)
 		{
 			tree.insert(&root, &rbs.at(i));
 		}
+		//tree.insert(&root, &rb1);
+		///tree.remove(&rb1, &root);
 		bool running = true;
 		while (running)
 		{
