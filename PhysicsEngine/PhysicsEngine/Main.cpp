@@ -266,8 +266,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		}
 		RigidBody rb1;
 		RigidBody rb2;
-		rb1.position = { 1,1 };
-		//rb2.position = { 0,0 };
+		rb1.position = { 0,0 };
+		rb2.position = { 1,1 };
 		rbs.push_back(rb1);
 		//rbs.push_back(rb2);
 
@@ -275,8 +275,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		{
 			tree.insert(&root, &rbs.at(i));
 		}
-		//tree.insert(&root, &rb1);
-		///tree.remove(&rb1, &root);
+		tree.insert(&root, &rb1);
+		tree.insert(&root, &rb2);
+		tree.remove(&rb1, &root);
 		bool running = true;
 		while (running)
 		{

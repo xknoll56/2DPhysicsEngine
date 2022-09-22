@@ -30,6 +30,11 @@ struct Quadrant
 		}
 	}
 
+	Quadrant operator=(const Quadrant& other)
+	{
+		return Quadrant(other.position, other.halfExtents);
+	}
+
 	Quadrant()
 	{
 
@@ -110,17 +115,14 @@ struct QuadTree
 				samePos = true;
 		}
 
-		if (q->rigidBody == nullptr || samePos)
+		if (!q->set)
 		{
 			q->rigidBody = rb;
+			subdivideAllQuadrant(q);
+			q->set = true;
 		}
 		else
 		{
-			if (!q->set)
-			{
-				subdivideAllQuadrant(q);
-				q->set = true;
-			}
 
 			QuadrantLocation qlChild = quadrantizePoint(q, rb->position);
 			insert(q->children[(int)qlChild], rb);
@@ -129,7 +131,9 @@ struct QuadTree
 			{
 				QuadrantLocation qlChild1 = quadrantizePoint(q, q->rigidBody->position);
 				insert(q->children[(int)qlChild1], q->rigidBody);
+				q->rigidBody = nullptr;
 			}
+
 		}
 
 		return true;
@@ -156,13 +160,30 @@ struct QuadTree
 
 
 
-	//void remove(RigidBody* rb, Quadrant* root)
-	//{
-	//	if (std::find(root->rigidBodies.begin(), root->rigidBodies.end(), rb) != root->rigidBodies.end())
-	//	{
-	//		std::remove(root->rigidBodies.begin(), root->rigidBodies.end(), rb);
-	//		QuadrantLocation loc = quadrantizePoint(root, rb->position);
-	//		remove(rb, root->children[(int)loc]);
-	//	}
-	//}
+	void remove(RigidBody* rb, Quadrant* root)
+	{
+		if (root->set)
+		{
+			if (rb == root->rigidBody)
+			{
+				root->rigidBody = nullptr;
+				bool found = false;
+				for (int i = 0; i < root->parent->children.size(); i++)
+				{
+					if (root->parent->children[i]->rigidBody != nullptr)
+					{
+						found = true;
+						break;
+					}
+				}
+				if (!found)
+					*root->parent = Quadrant(root->parent->position, root->parent->halfExtents);
+			}
+			else
+			{
+				QuadrantLocation loc = quadrantizePoint(root, rb->position);
+				remove(rb, root->children[(int)loc]);
+			}
+		}
+	}
 };
