@@ -43,7 +43,7 @@ struct Quadrant
 
 	Quadrant* parent = nullptr;
 	std::vector<Quadrant*> children;
-	std::vector<RigidBody*> rigidBodies;
+	RigidBody* rigidBody = nullptr;
 };
 
 struct QuadTree
@@ -96,25 +96,22 @@ struct QuadTree
 		return false;
 	}
 
-	void insert(Quadrant* q, RigidBody* rb)
+	bool insert(Quadrant* q, RigidBody* rb)
 	{
 		if (!pointIsInQuadrant(*q, rb->position))
 		{
-			return;
+			return false;
 		}
 		bool samePos = false;
-		for (int i = 0; i < q->rigidBodies.size(); i++)
+		if (q->rigidBody != nullptr)
 		{
-			if (q->rigidBodies[i]->position == rb->position)
-			{
+			if(q->rigidBody->position == rb->position)
 				samePos = true;
-				break;
-			}
 		}
-		if (q->rigidBodies.size()==0 || samePos)
+
+		if (q->rigidBody == nullptr || samePos)
 		{
-			if (std::find(q->rigidBodies.begin(), q->rigidBodies.end(), rb) == q->rigidBodies.end())
-				q->rigidBodies.push_back(rb);
+			q->rigidBody = rb;
 		}
 		else
 		{
@@ -128,12 +125,12 @@ struct QuadTree
 			{
 				Quadrant* child = q->children[i];
 				insert(child, rb);
-				for (int i = 0; i < q->rigidBodies.size(); i++)
-				{
-					insert(child, q->rigidBodies[i]);
-				}
+				if (q->rigidBody != nullptr)
+					insert(child, q->rigidBody);
 			}
 		}
+
+		return true;
 	}
 
 	enum QuadrantLocation
@@ -156,13 +153,13 @@ struct QuadTree
 	}
 
 
-	void remove(RigidBody* rb, Quadrant* root)
-	{
-		if (std::find(root->rigidBodies.begin(), root->rigidBodies.end(), rb) != root->rigidBodies.end())
-		{
-			std::remove(root->rigidBodies.begin(), root->rigidBodies.end(), rb);
-			QuadrantLocation loc = quadrantizePoint(root, rb->position);
-			remove(rb, root->children[(int)loc]);
-		}
-	}
+	//void remove(RigidBody* rb, Quadrant* root)
+	//{
+	//	if (std::find(root->rigidBodies.begin(), root->rigidBodies.end(), rb) != root->rigidBodies.end())
+	//	{
+	//		std::remove(root->rigidBodies.begin(), root->rigidBodies.end(), rb);
+	//		QuadrantLocation loc = quadrantizePoint(root, rb->position);
+	//		remove(rb, root->children[(int)loc]);
+	//	}
+	//}
 };

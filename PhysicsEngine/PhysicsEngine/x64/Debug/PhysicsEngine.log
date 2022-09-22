@@ -1,5 +1,4 @@
 ﻿  Main.cpp
-C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\QuadTree.h(163,15): warning C4834: discarding return value of function with 'nodiscard' attribute
 C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,30): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
 C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,30): warning C4244: 'initializing': conversion from 'float' to 'LONG', possible loss of data
 C:\Users\Xavier\Documents\GitHub\2DPhysicsEngine\PhysicsEngine\PhysicsEngine\Main.cpp(181,44): warning C4838: conversion from 'float' to 'LONG' requires a narrowing conversion
