@@ -70,6 +70,16 @@ vec2 operator*(float f, vec2 a)
 	return a;
 }
 
+float Dot(vec2 a, vec2 b)
+{
+	return a.x * b.x + a.y * b.y;
+}
+
+float Cross(vec2 a, vec2 b)
+{
+	return a.x * b.y - a.y * b.x;
+}
+
 struct RGBA
 {
 	float r, g, b, a;

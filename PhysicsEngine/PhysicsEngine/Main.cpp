@@ -2,9 +2,6 @@
 #include <Windows.h>
 #include <d2d1.h>
 #include <random>
-#include "vec.h"
-#include "QuadTree.h"
-#include "Input.h"
 
 typedef int int32;
 typedef unsigned int uint32;
@@ -20,6 +17,22 @@ float SCREEN_HEIGHT = 576;
 float aspect;
 
 HWND hwnd;
+
+ID2D1HwndRenderTarget* pRT = NULL;
+ID2D1SolidColorBrush* pBrush = NULL;
+
+
+#include "vec.h"
+#include "RigidBody.h"
+#include "Collider.h"
+#include "PhysicsWorld.h"
+#include "QuadTree.h"
+#include "Input.h"
+#include "Renderer.h"
+#include "Scene.h"
+#include "TestScene.h"
+
+
 
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -97,59 +110,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 }
 
 
-float camWidth = 10;
-vec2 camPos;
-
-void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position, vec2 scale, float angle, RGBA color)
-{
-	pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
-	float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
-
-	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
-		D2D1::Matrix3x2F::Rotation(angle) *
-		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (position.x-camPos.x)*modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - (position.y-camPos.y)*modifiedScale));
-
-	pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
-}
-
-void DrawBox(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position, vec2 scale, float angle, bool fill, RGBA color)
-{
-	pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
-	float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
-
-	pRT->SetTransform(D2D1::Matrix3x2F::Scale(scale.x, scale.y) *
-		D2D1::Matrix3x2F::Rotation(angle) *
-		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (position.x - camPos.x) * modifiedScale, 0.5f * (FLOAT)SCREEN_HEIGHT - (position.y - camPos.y) * modifiedScale));
-
-	if(fill)
-		pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
-	else
-		pRT->DrawRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
-}
-
-void DrawLine(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 position1, vec2 position2, float yScale, bool fill, RGBA color)
-{
-	vec2 dp = position2 - position1;
-	float len = dp.mag() *0.5f;
-	dp.normalize();
-
-	vec2 mid = (position2 + position1) * 0.5f;
-	float theta = atanf(-dp.y / dp.x)*57.29577f;
-	DrawBox(pRT, pBrush, mid, {len, yScale}, theta, color);
-
-}
-
-void DrawCircle(ID2D1HwndRenderTarget* pRT, ID2D1SolidColorBrush* pBrush, vec2 pos, float radius, float angle, RGBA color)
-{
-	pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
-	float modifiedScale = radius / camWidth;
-	pRT->SetTransform(D2D1::Matrix3x2F::Scale(modifiedScale, modifiedScale) *
-		D2D1::Matrix3x2F::Rotation(angle) *
-		D2D1::Matrix3x2F::Translation(0.5f * (FLOAT)SCREEN_WIDTH + (pos.x-camPos.x) * (0.5f / camWidth) * SCREEN_WIDTH, 0.5f * (FLOAT)SCREEN_HEIGHT - (pos.y-camPos.y) * (0.5f/camWidth)*SCREEN_WIDTH));
-
-	pRT->FillEllipse(D2D1::Ellipse({ 0.0F, 0.0F}, SCREEN_WIDTH * 0.5F, SCREEN_WIDTH * 0.5F), pBrush);
-
-}
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpCmdLine*/, int /*nShowCmd*/)
 {
@@ -208,7 +168,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		GetClientRect(hwnd, &rc);
 
 		// Create a Direct2D render target          
-		ID2D1HwndRenderTarget* pRT = NULL;
+		
 		hr = pD2DFactory->CreateHwndRenderTarget(
 			D2D1::RenderTargetProperties(),
 			D2D1::HwndRenderTargetProperties(
@@ -220,7 +180,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			&pRT
 		);
 
-		ID2D1SolidColorBrush* pBrush = NULL;
+		
 		if (SUCCEEDED(hr))
 		{
 
@@ -249,35 +209,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		}
 		double currentTimeInSeconds = 0.0;
 
-		vec2 pos{ 1.0f, 1.0 };
-		camPos = { 1,1 };
-		QuadTree tree;
-		Quadrant root({ 0,0 }, { 10, 10 });
-		tree.root = &root;
-		//tree.subdivideAllQuadrant(&root);
-		//tree.subdivideAllQuadrant(&tree.quadrants[0]);
-		std::vector<RigidBody> rbs;
-		for (int i = 0; i < 100; i++)
-		{
-			float x = rand() % 100 / 5 - 10;
-			float y = rand() % 100 / 5 - 10;
-			rbs.push_back(RigidBody());
-			rbs.at(rbs.size() - 1).position = { x, y };
-		}
-		RigidBody rb1;
-		RigidBody rb2;
-		rb1.position = { 0,0 };
-		rb2.position = { 1,1 };
-		rbs.push_back(rb1);
-		//rbs.push_back(rb2);
+	
 
-		for (int i = 0; i < rbs.size(); i++)
-		{
-			tree.insert(&root, &rbs.at(i));
-		}
-		tree.insert(&root, &rb1);
-		tree.insert(&root, &rb2);
-		tree.remove(&rb1, &root);
+		Renderer renderer;
+		TestScene scene(&renderer);
+		scene.setup();
+
+
 		bool running = true;
 		while (running)
 		{
@@ -303,41 +241,19 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 				DispatchMessageW(&msg);
 			}
 
-			//reset input downs
-			memset(keysDown, false, INPUT_SIZE);
-			memset(mouseDown, false, MOUSE_SIZE);
-
 			pRT->BeginDraw();
 			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
 
-			float angle = 0.0f;
-			float radius = 0.5f;
-
-			if (keys[KEY_W])
-				camPos += vec2(0, 5.0f*dt);
-			if (keys[KEY_A])
-				camPos += vec2(-5.0f * dt, 0);
-			if (keys[KEY_S])
-				camPos += vec2(0, -5.0f * dt);
-			if (keys[KEY_D])
-				camPos += vec2(5.0f * dt, 0);
-
-			for(int i = 0; i<tree.quadrants.size();i++)
-				DrawBox(pRT, pBrush, tree.quadrants[i].position, tree.quadrants[i].halfExtents, angle, false, RGBA{0.0f, 1.0f, 0.0f, 1.0f});
-			//for (int i = -10; i <= 0; i++)
-			//	DrawBox(pRT, pBrush, { (float)i,(float)i }, { 0.5,0.5f }, 0, { 1,0,0,1 });
-			DrawBox(pRT, pBrush, root.position, root.halfExtents, angle, false, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
-			//DrawBox(pRT, pBrush, { -2.5,-2.5 }, { 7.5, 7.5 }, angle, false, RGBA{ 0.0f, 1.0f, 0.0f, 1.0f });
-
-			for (int i = 0; i < rbs.size(); i++)
-			{
-				RigidBody rb = rbs.at(i);
-				DrawCircle(pRT, pBrush, rb.position, 0.25f, 0, { 1, 0, 0, 1 });
-			}
+			scene.update(dt);
+			//renderer.DrawCapsule({ 0,0 }, 1.0f, 0.5f, currentTimeInSeconds, { 1,1,1,1 });
 
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
 				std::cout << "Failed to draw" << std::endl;
+
+			//reset input downs
+			memset(keysDown, false, INPUT_SIZE);
+			memset(mouseDown, false, MOUSE_SIZE);
 		}
 	}
 }

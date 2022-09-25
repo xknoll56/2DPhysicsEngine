@@ -1,13 +1,7 @@
 #pragma once
 #include <vector>
 
-struct RigidBody
-{
-	vec2 position;
-	vec2 velocity;
-	float angle;
-	float angularVelocity;
-};
+
 struct Quadrant
 {
 	vec2 position;
