@@ -21,6 +21,8 @@ struct RigidBody
 		velocity = { 0.0f,0.0f };
 		angle = 0.0f;
 		angularVelocity = 0.0f;
+		angularMomentum = 0.0f;
+		momentum = { 0.0f,0.0f };
 	}
 
 	void addForce(vec2 force)
