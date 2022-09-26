@@ -132,6 +132,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="CubeSpace.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="PhysicsWorld.h" />
     <ClInclude Include="QuadTree.h" />

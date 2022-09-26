@@ -25,8 +25,16 @@ struct vec2
 	void normalize()
 	{
 		float mag = this->mag();
-		x /= mag;
-		y /= mag;
+		if (mag > 0)
+		{
+			x /= mag;
+			y /= mag;
+		}
+		else
+		{
+			x = 1.0f;
+			y = 0.0f;
+		}
 	}
 
 	vec2 operator+=(const vec2& a)

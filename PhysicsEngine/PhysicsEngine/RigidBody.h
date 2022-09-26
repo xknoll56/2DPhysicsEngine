@@ -46,7 +46,7 @@ struct RigidBody
 		{
 			angularMomentum += *i*dt;
 		}
-		forces.clear();
+		torques.clear();
 
 		velocity = momentum * (1.0f/mass);
 		angularVelocity = angularMomentum / inertia;

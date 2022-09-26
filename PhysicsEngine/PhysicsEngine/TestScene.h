@@ -13,11 +13,11 @@ public:
 	}
 	void setup()
 	{
-		for (int i = 0; i < 20; i++)
+		for (int i = 0; i < 30; i++)
 		{
 			CircleCollider collider;
-			collider.setVelocity(vec2{ (float)(rand() % 2), (float)(rand() % 2) });
-			collider.position = (vec2{ (float)(rand() % 5), (float)(rand() % 5) });
+			collider.setVelocity(vec2{ (float)(rand() % 4)-2, (float)(rand() % 4)-2 });
+			collider.position = (vec2{ (float)(rand() % 20)-10, (float)(rand() % 20)-10 });
 			colliders.push_back(collider);
 		}
 
@@ -30,8 +30,6 @@ public:
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
-		//renderer->camPos = c1.position;
-		std::cout << c1.velocity.y << std::endl;
 		world.stepNoSpaceDivision(dt);
 		for (int i = 0; i < colliders.size(); i++)
 		{

@@ -43,6 +43,14 @@ struct PhysicsWorld
 			a.addForce(relMomentumNorm * (-1.0f / dt));
 		}
 
+		vec2 dpPerp = { -dp.y, dp.x };
+		mag = Dot(dpPerp, relMomentum);
+		if (mag > 0)
+		{
+			b.addTorque(mag*restitution * (1.0f / dt));
+			a.addTorque(mag*restitution * (-1.0f / dt));
+		}
+
 	}
 
 	void stepNoSpaceDivision(float dt)
