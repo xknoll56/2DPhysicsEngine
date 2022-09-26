@@ -26,6 +26,7 @@ ID2D1SolidColorBrush* pBrush = NULL;
 #include "RigidBody.h"
 #include "Collider.h"
 #include "CubeSpace.h"
+#include "QuadTree.h"
 #include "PhysicsWorld.h"
 #include "Input.h"
 #include "Renderer.h"

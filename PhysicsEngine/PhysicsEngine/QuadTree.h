@@ -1,183 +1,170 @@
 #pragma once
-#include <vector>
 
-
-struct Quadrant
-{
-	vec2 position;
-	vec2 halfExtents;
-
-	Quadrant(vec2 position, vec2 halfExtents)
-	{
-		this->position = position;
-		this->halfExtents = halfExtents;
-		bottomLeftExtent = position - halfExtents;
-		topRightExtent = position + halfExtents;
-		topLeftExtent = position + vec2(-halfExtents.x, halfExtents.y);
-		bottomRightExtent = position + vec2(halfExtents.x, -halfExtents.y);
-		children.reserve(4);
-		for (int i = 0; i < 4; i++)
-		{
-			Quadrant q;
-			children.push_back(&q);
-			parent = this;
-		}
-	}
-
-	Quadrant operator=(const Quadrant& other)
-	{
-		return Quadrant(other.position, other.halfExtents);
-	}
-
-	Quadrant()
-	{
-
-	}
-
-	vec2 bottomLeftExtent;
-	vec2 topLeftExtent;
-	vec2 topRightExtent;
-	vec2 bottomRightExtent;
-	bool set = false;
-	
-
-	Quadrant* parent = nullptr;
-	std::vector<Quadrant*> children;
-	RigidBody* rigidBody = nullptr;
+// The objects that we want stored in the quadtree
+struct QuadNode {
+    vec2 pos;
+    int data;
+    QuadNode(vec2 _pos, int _data)
+    {
+        pos = _pos;
+        data = _data;
+    }
+    QuadNode() { data = 0; }
 };
 
-struct QuadTree
-{
-	Quadrant* root;
-	Quadrant* outside;
-	std::vector<Quadrant> quadrants;
+// The main quadtree class
+class QuadTree {
+    // Hold details of the boundary of this node
+    vec2 topLeft;
+    vec2 botRight;
 
-	QuadTree()
-	{
-		quadrants.reserve(10000);
-	}
+    // Contains details of node
+    QuadNode* n;
 
-	QuadTree(int reserve)
-	{
-		quadrants.reserve(reserve);
-	}
-	
-	void subdivideAllQuadrant(Quadrant* quadrant)
-	{
-		vec2 halfHalfExtents =  0.5f*quadrant->halfExtents;
-		
-		Quadrant q((quadrant->position + quadrant->bottomLeftExtent) * 0.5f, halfHalfExtents);
-		quadrants.push_back(q);
-		quadrant->children[0] = &quadrants[quadrants.size() - 1];
+    // Children of this tree
+    QuadTree* topLeftTree;
+    QuadTree* topRightTree;
+    QuadTree* botLeftTree;
+    QuadTree* botRightTree;
 
-		Quadrant q1((quadrant->position + quadrant->bottomRightExtent) * 0.5f, halfHalfExtents);
-		quadrants.push_back(q1);
-		quadrant->children[1] = &quadrants[quadrants.size() - 1];
-
-		Quadrant q2((quadrant->position + quadrant->topLeftExtent) * 0.5f, halfHalfExtents);
-		quadrants.push_back(q2);
-		quadrant->children[2] = &quadrants[quadrants.size() - 1];
-
-		Quadrant q3((quadrant->position + quadrant->topRightExtent) * 0.5f, halfHalfExtents);
-		quadrants.push_back(q3);
-		quadrant->children[3] = &quadrants[quadrants.size() - 1];
-
-
-	}
-
-	bool pointIsInQuadrant(Quadrant& q, vec2 point)
-	{
-		if (point.x >= q.bottomLeftExtent.x && point.x < q.topRightExtent.x)
-		{
-			if (point.y >= q.bottomLeftExtent.y && point.y < q.topRightExtent.y)
-				return true;
-		}
-
-		return false;
-	}
-
-	bool insert(Quadrant* q, RigidBody* rb)
-	{
-		if (!pointIsInQuadrant(*q, rb->position))
-		{
-			return false;
-		}
-		bool samePos = false;
-		if (q->rigidBody != nullptr)
-		{
-			if(q->rigidBody->position == rb->position)
-				samePos = true;
-		}
-
-		if (!q->set)
-		{
-			q->rigidBody = rb;
-			subdivideAllQuadrant(q);
-			q->set = true;
-		}
-		else
-		{
-
-			QuadrantLocation qlChild = quadrantizePoint(q, rb->position);
-			insert(q->children[(int)qlChild], rb);
-
-			if (q->rigidBody != nullptr)
-			{
-				QuadrantLocation qlChild1 = quadrantizePoint(q, q->rigidBody->position);
-				insert(q->children[(int)qlChild1], q->rigidBody);
-				q->rigidBody = nullptr;
-			}
-
-		}
-
-		return true;
-	}
-
-	enum QuadrantLocation
-	{
-		bottomLeft = 0,
-		bottomRight = 1,
-		topLeft = 2,
-		topRight = 3
-	};
-
-	QuadrantLocation quadrantizePoint(Quadrant* q, vec2 point)
-	{
-		int ret = 0b00;
-		if (point.x >= q->position.x)
-			ret |= 0b01;
-		if (point.y >= q->position.y)
-			ret |= 0b10;
-
-		return (QuadrantLocation)ret;
-	}
-
-
-
-	void remove(RigidBody* rb, Quadrant* root)
-	{
-		if (root->set)
-		{
-			if (rb == root->rigidBody)
-			{
-				root->rigidBody = nullptr;
-				bool found = false;
-				for (int i = 0; i < root->parent->children.size(); i++)
-				{
-					if (root->parent->children[i]->rigidBody != nullptr)
-					{
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-					*root->parent = Quadrant(root->parent->position, root->parent->halfExtents);
-			}
-			else
-			{
-				QuadrantLocation loc = quadrantizePoint(root, rb->position);
-				remove(rb, root->children[(int)loc]);
-			}
-		}
-	}
+public:
+    QuadTree()
+    {
+        topLeft = vec2(0, 0);
+        botRight = vec2(0, 0);
+        n = NULL;
+        topLeftTree = NULL;
+        topRightTree = NULL;
+        botLeftTree = NULL;
+        botRightTree = NULL;
+    }
+    QuadTree(vec2 topL, vec2 botR)
+    {
+        n = NULL;
+        topLeftTree = NULL;
+        topRightTree = NULL;
+        botLeftTree = NULL;
+        botRightTree = NULL;
+        topLeft = topL;
+        botRight = botR;
+    }
+    void insert(QuadNode*);
+    QuadNode* search(vec2);
+    bool inBoundary(vec2);
 };
+
+// Insert a node into the quadtree
+void QuadTree::insert(QuadNode* node)
+{
+    if (node == NULL)
+        return;
+
+    // Current quad cannot contain it
+    if (!inBoundary(node->pos))
+        return;
+
+    // We are at a quad of unit area
+    // We cannot subdivide this quad further
+    if (abs(topLeft.x - botRight.x) <= 1
+        && abs(topLeft.y - botRight.y) <= 1) {
+        if (n == NULL)
+            n = node;
+        return;
+    }
+
+    if ((topLeft.x + botRight.x) / 2 >= node->pos.x) {
+        // Indicates topLeftTree
+        if ((topLeft.y + botRight.y) / 2 >= node->pos.y) {
+            if (topLeftTree == NULL)
+                topLeftTree = new QuadTree(
+                    vec2(topLeft.x, topLeft.y),
+                    vec2((topLeft.x + botRight.x) / 2,
+                        (topLeft.y + botRight.y) / 2));
+            topLeftTree->insert(node);
+        }
+
+        // Indicates botLeftTree
+        else {
+            if (botLeftTree == NULL)
+                botLeftTree = new QuadTree(
+                    vec2(topLeft.x,
+                        (topLeft.y + botRight.y) / 2),
+                    vec2((topLeft.x + botRight.x) / 2,
+                        botRight.y));
+            botLeftTree->insert(node);
+        }
+    }
+    else {
+        // Indicates topRightTree
+        if ((topLeft.y + botRight.y) / 2 >= node->pos.y) {
+            if (topRightTree == NULL)
+                topRightTree = new QuadTree(
+                    vec2((topLeft.x + botRight.x) / 2,
+                        topLeft.y),
+                    vec2(botRight.x,
+                        (topLeft.y + botRight.y) / 2));
+            topRightTree->insert(node);
+        }
+
+        // Indicates botRightTree
+        else {
+            if (botRightTree == NULL)
+                botRightTree = new QuadTree(
+                    vec2((topLeft.x + botRight.x) / 2,
+                        (topLeft.y + botRight.y) / 2),
+                    vec2(botRight.x, botRight.y));
+            botRightTree->insert(node);
+        }
+    }
+}
+
+// Find a node in a quadtree
+QuadNode* QuadTree::search(vec2 p)
+{
+    // Current quad cannot contain it
+    if (!inBoundary(p))
+        return NULL;
+
+    // We are at a quad of unit length
+    // We cannot subdivide this quad further
+    if (n != NULL)
+        return n;
+
+    if ((topLeft.x + botRight.x) / 2 >= p.x) {
+        // Indicates topLeftTree
+        if ((topLeft.y + botRight.y) / 2 >= p.y) {
+            if (topLeftTree == NULL)
+                return NULL;
+            return topLeftTree->search(p);
+        }
+
+        // Indicates botLeftTree
+        else {
+            if (botLeftTree == NULL)
+                return NULL;
+            return botLeftTree->search(p);
+        }
+    }
+    else {
+        // Indicates topRightTree
+        if ((topLeft.y + botRight.y) / 2 >= p.y) {
+            if (topRightTree == NULL)
+                return NULL;
+            return topRightTree->search(p);
+        }
+
+        // Indicates botRightTree
+        else {
+            if (botRightTree == NULL)
+                return NULL;
+            return botRightTree->search(p);
+        }
+    }
+};
+
+// Check if current quadtree contains the point
+bool QuadTree::inBoundary(vec2 p)
+{
+    return (p.x >= topLeft.x && p.x <= botRight.x
+        && p.y >= topLeft.y && p.y <= botRight.y);
+}
