@@ -13,12 +13,12 @@ struct RigidBody
 	std::list<vec2> forces;
 	std::list<float> torques;
 
-	vec2 getLocalX()
+	vec2 getLocalX() const
 	{
 		return vec2{ cosf(angle), sinf(angle) };
 	}
 
-	vec2 getLocalY()
+	vec2 getLocalY() const
 	{
 		return vec2{ -sinf(angle), cosf(angle) };
 	}

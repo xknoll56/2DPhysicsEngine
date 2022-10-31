@@ -6,15 +6,36 @@ struct CircleColliderPair
 	CircleCollider* b;
 };
 
+struct CircleBoxColliderPair
+{
+	BoxCollider* a;
+	CircleCollider* b;
+};
+
 struct PhysicsWorld
 {
 	std::vector<BoxCollider*> boxColliders;
 	std::vector<CircleCollider*> circleColliders;
+	std::vector<CircleColliderPair> circleColliderPairs;
+	std::vector<CircleBoxColliderPair> circleBoxColliderPairs;
 	float restitution = 0.4f;
 
 	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b)
 	{
+		vec2 right = a.getLocalX();
+		vec2 up = a.getLocalY();
 
+		vec2 dp = b.position - a.position;
+		float rightDist = fabsf(Dot(right, dp));
+		float upDist = fabsf(Dot(up, dp));
+
+		if (rightDist > (a.halfExtents.x + b.radius))
+			return false;
+
+		if (upDist > (a.halfExtents.y + b.radius))
+			return false;
+
+		return true;
 	}
 
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)
@@ -66,8 +87,10 @@ struct PhysicsWorld
 		for (int i = 0; i < boxColliders.size(); i++)
 			boxColliders[i]->step(dt);
 
-		std::vector<CircleColliderPair> circleColliderPairs;
+		circleColliderPairs.clear();
+		circleBoxColliderPairs.clear();
 
+		//handle all circle circle collision
 		for (int i = 0; i < circleColliders.size(); i++)
 		{
 			for (int j = 0; j < circleColliders.size(); j++)
@@ -97,6 +120,21 @@ struct PhysicsWorld
 						}
 					}
 				}
+			}
+		}
+
+		//handle all circle box collider collisions
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			for (int j = 0; j < circleColliders.size(); j++)
+			{
+				BoxCollider* a = boxColliders[i];
+				CircleCollider* b = circleColliders[j];
+				if (boxCircleOverlap(*a, *b))
+				{
+					circleBoxColliderPairs.push_back(CircleBoxColliderPair{ a,b });
+				}
+
 			}
 		}
 

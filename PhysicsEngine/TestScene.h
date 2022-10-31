@@ -5,7 +5,6 @@ class TestScene : Scene
 public: 
 	CircleCollider c1;
 	CircleCollider c2;
-	std::vector<CircleCollider> colliders;
 	BoxCollider boxCollider;
 	SquareSpace squareSpace;
 
@@ -26,7 +25,10 @@ public:
 		//for(int i = 0; i<colliders.size(); i++)
 		//	world.circleColliders.push_back(&colliders.at(i));
 		boxCollider.angularMomentum = 1;
+		boxCollider.halfExtents = { 0.8, 2.0 };
 		world.boxColliders.push_back(&boxCollider);
+		c1.position = { 5,5 };
+		world.circleColliders.push_back(&c1);
 	}
 
 	void update(float dt)
@@ -35,6 +37,21 @@ public:
 		world.step(dt);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 		renderer->drawUnitDirs(boxCollider.position, boxCollider.angle);
+
+		c1.setVelocity({ 0,0 });
+		if (keys[KEY_I])
+			c1.setVelocity({ 0, 1 });
+		if (keys[KEY_J])
+			c1.setVelocity({ -1, 0 });
+		if (keys[KEY_K])
+			c1.setVelocity({ 0, -1 });
+		if (keys[KEY_L])
+			c1.setVelocity({ 1, 0 });
+
+		if(!world.boxCircleOverlap(boxCollider, c1))
+			renderer->drawCircleCollider(&c1, { 1,1,1,1 });
+		else
+			renderer->drawCircleCollider(&c1, { 1,0,0,1 });
 		//renderer->drawLine(boxCollider.position, boxCollider.position + boxCollider.getLocalX(), 0.05f, true, { 0,0,1,1 });
 		//renderer->drawLine(boxCollider.position, boxCollider.position + boxCollider.getLocalY(), 0.05f, true, { 1,0,0,1 });
 		//for (int i = 0; i < colliders.size(); i++)
