@@ -12,6 +12,13 @@ struct CircleBoxColliderPair
 	CircleCollider* b;
 };
 
+struct RayCastHit
+{
+	vec2 position;
+	vec2 normal;
+	float dist;
+};
+
 struct PhysicsWorld
 {
 	std::vector<BoxCollider*> boxColliders;
@@ -20,12 +27,33 @@ struct PhysicsWorld
 	std::vector<CircleBoxColliderPair> circleBoxColliderPairs;
 	float restitution = 0.4f;
 
+	bool circleRayCast(vec2 position, vec2 direction, const CircleCollider& cc, RayCastHit& rch)
+	{
+		vec2 dirPerp = { -direction.y, direction.x };
+		vec2 dp = cc.position - position;
+
+		float distDir = fabs(Dot(direction, dp));
+		float distPerp = fabsf(Dot(dirPerp, dp));
+
+		if (distPerp < cc.radius)
+		{
+			float theta = acosf(distPerp / cc.radius);
+			rch.dist = distDir - distPerp * tanf(theta);
+			rch.position = position + direction*rch.dist;
+			rch.normal = rch.position - cc.position;
+			rch.normal.normalize();
+			return true;
+		}
+
+		return false;
+	}
+
 	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b)
 	{
 		vec2 right = a.getLocalX();
 		vec2 up = a.getLocalY();
-
 		vec2 dp = b.position - a.position;
+
 		float rightDist = fabsf(Dot(right, dp));
 		float upDist = fabsf(Dot(up, dp));
 
@@ -34,6 +62,8 @@ struct PhysicsWorld
 
 		if (upDist > (a.halfExtents.y + b.radius))
 			return false;
+
+
 
 		return true;
 	}

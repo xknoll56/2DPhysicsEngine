@@ -44,9 +44,24 @@ struct vec2
 		return *this;
 	}
 
+	vec2 operator-=(const vec2& a)
+	{
+		this->x -= a.x;
+		this->y -= a.y;
+		return *this;
+	}
+
 	bool operator==(const vec2& other)
 	{
 		return other.x == x && other.y == y;
+	}
+
+	vec2 operator-()
+	{
+		vec2 ret;
+		ret.x = -this->x;
+		ret.y = -this->y;
+		return ret;
 	}
 };
 
