@@ -6,6 +6,7 @@ public:
 	CircleCollider c1;
 	CircleCollider c2;
 	std::vector<CircleCollider> colliders;
+	BoxCollider boxCollider;
 	SquareSpace squareSpace;
 
 	TestScene(Renderer* renderer)
@@ -14,26 +15,32 @@ public:
 	}
 	void setup()
 	{
-		for (int i = 0; i < 10; i++)
-		{
-			CircleCollider cc;
-			cc.position = vec2{ (float)(rand() % 10 - 5),  (float)(rand() % 10  - 5)};
-			cc.momentum = vec2{ (float)(rand() % 10 - 5),  (float)(rand() % 10  - 5)};
-			std::cout << cc.velocity.x << std::endl;
-			colliders.push_back(cc);
-		}
-		for(int i = 0; i<colliders.size(); i++)
-			world.circleColliders.push_back(&colliders.at(i));
+		//for (int i = 0; i < 10; i++)
+		//{
+		//	CircleCollider cc;
+		//	cc.position = vec2{ (float)(rand() % 10 - 5),  (float)(rand() % 10  - 5)};
+		//	cc.momentum = vec2{ (float)(rand() % 10 - 5),  (float)(rand() % 10  - 5)};
+		//	std::cout << cc.velocity.x << std::endl;
+		//	colliders.push_back(cc);
+		//}
+		//for(int i = 0; i<colliders.size(); i++)
+		//	world.circleColliders.push_back(&colliders.at(i));
+		boxCollider.angularMomentum = 1;
+		world.boxColliders.push_back(&boxCollider);
 	}
 
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
 		world.step(dt);
-		for (int i = 0; i < colliders.size(); i++)
-		{
-			renderer->DrawCircleCollider(&colliders[i], { 1,1,1,1 });
-		}
+		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
+		renderer->drawUnitDirs(boxCollider.position, boxCollider.angle);
+		//renderer->drawLine(boxCollider.position, boxCollider.position + boxCollider.getLocalX(), 0.05f, true, { 0,0,1,1 });
+		//renderer->drawLine(boxCollider.position, boxCollider.position + boxCollider.getLocalY(), 0.05f, true, { 1,0,0,1 });
+		//for (int i = 0; i < colliders.size(); i++)
+		//{
+		//	renderer->DrawCircleCollider(&colliders[i], { 1,1,1,1 });
+		//}
 
 	}
 };

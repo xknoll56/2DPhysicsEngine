@@ -17,6 +17,11 @@ struct RigidBody
 	{
 		return vec2{ cosf(angle), sinf(angle) };
 	}
+
+	vec2 getLocalY()
+	{
+		return vec2{ -sinf(angle), cosf(angle) };
+	}
 	
 
 	RigidBody()

@@ -12,6 +12,11 @@ struct PhysicsWorld
 	std::vector<CircleCollider*> circleColliders;
 	float restitution = 0.4f;
 
+	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b)
+	{
+
+	}
+
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)
 	{
 		vec2 dp = b.position - a.position;
@@ -57,6 +62,9 @@ struct PhysicsWorld
 	{
 		for (int i = 0; i < circleColliders.size(); i++)
 			circleColliders[i]->step(dt);
+
+		for (int i = 0; i < boxColliders.size(); i++)
+			boxColliders[i]->step(dt);
 
 		std::vector<CircleColliderPair> circleColliderPairs;
 
