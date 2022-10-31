@@ -28,34 +28,54 @@ struct AABB
 	}
 };
 
+enum ColliderType
+{
+	CIRCLE = 0,
+	BOX = 1
+};
+struct Collider : RigidBody
+{
+	ColliderType type;
+};
 
-struct CircleCollider : RigidBody
+
+struct CircleCollider : Collider
 {
 	float radius;
 
 	CircleCollider()
 	{
 		radius = 0.5f;
+		type = ColliderType::CIRCLE;
 	}
 
 	CircleCollider(float radius)
 	{
 		this->radius = radius;
+		type = ColliderType::CIRCLE;
 	}
  };
 
-
-struct BoxCollider : RigidBody
+enum BoxSide
+{
+	RIGHT = 0,
+	UP,
+	LEFT,
+	DOWN
+};
+struct BoxCollider : Collider
 {
 	vec2 halfExtents;
 
 	BoxCollider()
 	{
 		halfExtents = { 0.5f, 0.5f };
+		type = ColliderType::BOX;
 	}
 
 	BoxCollider(vec2 halfExtents)
 	{
 		this->halfExtents = halfExtents;
+		type = ColliderType::BOX;
 	}
 };

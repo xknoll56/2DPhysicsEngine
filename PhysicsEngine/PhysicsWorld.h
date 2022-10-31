@@ -19,6 +19,13 @@ struct RayCastHit
 	float dist;
 };
 
+struct ContactInfo
+{
+	std::vector<vec2> points;
+	vec2 normal;
+	float minimumPenetration
+};
+
 struct PhysicsWorld
 {
 	std::vector<BoxCollider*> boxColliders;
@@ -32,17 +39,23 @@ struct PhysicsWorld
 		vec2 dirPerp = { -direction.y, direction.x };
 		vec2 dp = cc.position - position;
 
-		float distDir = fabs(Dot(direction, dp));
-		float distPerp = fabsf(Dot(dirPerp, dp));
-
-		if (distPerp < cc.radius)
+		if (dp.mag() > cc.radius)
 		{
-			float theta = acosf(distPerp / cc.radius);
-			rch.dist = distDir - distPerp * tanf(theta);
-			rch.position = position + direction*rch.dist;
-			rch.normal = rch.position - cc.position;
-			rch.normal.normalize();
-			return true;
+			float distDir = (Dot(direction, dp));
+			if (distDir >= 0)
+			{
+				float distPerp = fabsf(Dot(dirPerp, dp));
+
+				if (distPerp < cc.radius)
+				{
+					float theta = acosf(distPerp / cc.radius);
+					rch.dist = distDir - distPerp * tanf(theta);
+					rch.position = position + direction * rch.dist;
+					rch.normal = rch.position - cc.position;
+					rch.normal.normalize();
+					return true;
+				}
+			}
 		}
 
 		return false;

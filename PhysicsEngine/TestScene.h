@@ -18,7 +18,7 @@ public:
 		boxCollider.halfExtents = { 0.8, 2.0 };
 		world.boxColliders.push_back(&boxCollider);
 		c1.position = { 5,5 };
-		c1.radius = 3.25f;
+		c1.radius = 0.8f;
 		world.circleColliders.push_back(&c1);
 	}
 
@@ -31,28 +31,18 @@ public:
 
 		c1.setVelocity({ 0,0 });
 		if (keys[KEY_I])
-			c1.setVelocity({ 0, 1 });
+			c1.setVelocity({ 0, 3 });
 		if (keys[KEY_J])
-			c1.setVelocity({ -1, 0 });
+			c1.setVelocity({ -3, 0 });
 		if (keys[KEY_K])
-			c1.setVelocity({ 0, -1 });
+			c1.setVelocity({ 0, -3 });
 		if (keys[KEY_L])
-			c1.setVelocity({ 1, 0 });
+			c1.setVelocity({ 3, 0 });
 
 		if(!world.boxCircleOverlap(boxCollider, c1))
 			renderer->drawCircleCollider(&c1, { 1,1,1,1 });
 		else
 			renderer->drawCircleCollider(&c1, { 1,0,0,1 });
-
-
-
-		vec2 dir = { 1, 0.5 };
-		dir.normalize();
-		RayCastHit hit;
-		if (!world.circleRayCast({ 0,0 }, dir, c1, hit))
-			renderer->drawLine({ 0,0 }, dir * 20.0f, 0.05, true, { 1,0,0,1 });
-		else
-			renderer->drawLine({ 0,0 }, hit.position, 0.05, true, { 0,0,1,1 });
 
 	}
 };
