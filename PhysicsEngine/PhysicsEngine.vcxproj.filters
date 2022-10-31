@@ -26,9 +26,6 @@
     <ClInclude Include="vec.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="QuadTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="RigidBody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -47,7 +44,7 @@
     <ClInclude Include="TestScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CubeSpace.h">
+    <ClInclude Include="SquareSpace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -53,7 +53,7 @@ struct PhysicsWorld
 
 	}
 
-	void stepNoSpaceDivision(float dt)
+	void step(float dt)
 	{
 		for (int i = 0; i < circleColliders.size(); i++)
 			circleColliders[i]->step(dt);
