@@ -103,6 +103,11 @@ float Cross(vec2 a, vec2 b)
 	return a.x * b.y - a.y * b.x;
 }
 
+vec2 Tangent(vec2 a)
+{
+	return vec2{ -a.y, a.x };
+}
+
 struct RGBA
 {
 	float r, g, b, a;

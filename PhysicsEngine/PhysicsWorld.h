@@ -241,6 +241,39 @@ struct PhysicsWorld
 		return false;
 	}
 
+	void boxCircleResponse(ContactInfo& ci, float dt)
+	{
+		BoxCollider& a = *dynamic_cast<BoxCollider*>(ci.a);
+		CircleCollider& b = *dynamic_cast<CircleCollider*>(ci.b);
+
+		a.position -= ci.penetration * 0.5f * ci.normal;
+		b.position += ci.penetration * 0.5f * ci.normal;
+
+		float epsilon = 0.5f;
+
+		vec2 ra = ci.points[0] - a.position;
+		vec2 rb = ci.points[0] - b.position;
+		vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
+		vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
+
+		float vRel = Dot(ci.normal, pb - pa);
+		float numerator = (1 - epsilon) * vRel;
+
+		float t1 = 1 / a.mass;
+		float t2 = 1 / b.mass;
+		float t3 = ra.mag() * ra.mag() / a.inertia;
+		float t4 = rb.mag() * rb.mag() / b.inertia;
+
+		float j = numerator / (t1 + t2 + t3 + t4);
+		vec2 force = ci.normal * j *(1.0f/ dt);
+
+		a.addForce(force);
+		a.addTorque(Cross(ra, force));
+
+		b.addForce(-force);
+		b.addTorque(Cross(rb, -force));
+	}
+
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)
 	{
 		vec2 dp = b.position - a.position;
@@ -359,6 +392,11 @@ struct PhysicsWorld
 			CircleCollider& ac = *dynamic_cast<CircleCollider*>(circleColliderPairs[k].a);
 			CircleCollider& bc = *dynamic_cast<CircleCollider*>(circleColliderPairs[k].b);
 			circleCircleResponse(dt, ac, bc);
+		}
+
+		for (int k = 0; k < circleBoxColliderPairs.size(); k++)
+		{
+			boxCircleResponse(circleBoxColliderPairs[k], dt);
 		}
 	}
 };
