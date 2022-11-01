@@ -47,5 +47,8 @@
     <ClInclude Include="SquareSpace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BallRollScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

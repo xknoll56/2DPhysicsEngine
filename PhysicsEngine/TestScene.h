@@ -23,6 +23,7 @@ public:
 		c1.radius = 3.25f;
 		world.circleColliders.push_back(&c1);
 		world.useGravity = false;
+		boxCollider.isDynamic = false;
 	}
 
 	void update(float dt)

@@ -245,9 +245,10 @@ struct PhysicsWorld
 	{
 		BoxCollider& a = *dynamic_cast<BoxCollider*>(ci.a);
 		CircleCollider& b = *dynamic_cast<CircleCollider*>(ci.b);
-
-		a.position -= ci.penetration * 0.5f * ci.normal;
-		b.position += ci.penetration * 0.5f * ci.normal;
+		if(a.isDynamic)
+			a.position -= ci.penetration * 0.5f * ci.normal;
+		if(b.isDynamic)
+			b.position += ci.penetration * 0.5f * ci.normal;
 
 		float epsilon = 0.5f;
 
@@ -268,10 +269,14 @@ struct PhysicsWorld
 		vec2 force = ci.normal * j *(1.0f/ dt);
 
 		a.addForce(force);
-		a.addTorque(Cross(ra, force));
+		float torqueA = Cross(ra, force);
+		a.addTorque(torqueA);
 
 		b.addForce(-force);
-		b.addTorque(Cross(rb, -force));
+		vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
+		vec2 vt = b.velocity - vn;
+		float torqueB = -copysign(1.0f,Cross(vt, ci.normal))*rb.mag()*force.mag();
+		b.addTorque(torqueB);
 	}
 
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)

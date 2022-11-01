@@ -33,6 +33,7 @@ ID2D1SolidColorBrush* pBrush = NULL;
 #include "Renderer.h"
 #include "Scene.h"
 #include "TestScene.h"
+#include "BallRollScene.h"
 
 
 
@@ -215,7 +216,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 
 		Renderer renderer;
 		TestScene scene(&renderer);
+		BallRollScene brs(&renderer);
 		scene.setup();
+		brs.setup();
 
 
 		bool running = true;
@@ -247,7 +250,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			pRT->BeginDraw();
 			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
 
-			scene.update(dt);
+			brs.update(dt);
 			//renderer.DrawCapsule({ 0,0 }, 1.0f, 0.5f, currentTimeInSeconds, { 1,1,1,1 });
 
 			HRESULT hr = pRT->EndDraw();

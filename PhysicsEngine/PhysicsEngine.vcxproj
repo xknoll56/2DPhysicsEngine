@@ -131,6 +131,7 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BallRollScene.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="SquareSpace.h" />
     <ClInclude Include="Input.h" />
