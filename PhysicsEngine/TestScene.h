@@ -1,4 +1,5 @@
 #pragma once
+extern float elapsedTime;
 
 class TestScene : Scene
 {
@@ -18,7 +19,7 @@ public:
 		boxCollider.halfExtents = { 0.8, 2.0 };
 		world.boxColliders.push_back(&boxCollider);
 		c1.position = { 5,5 };
-		c1.radius = 0.8f;
+		c1.radius = 3.25f;
 		world.circleColliders.push_back(&c1);
 	}
 
@@ -38,17 +39,29 @@ public:
 			c1.setVelocity({ 0, -3 });
 		if (keys[KEY_L])
 			c1.setVelocity({ 3, 0 });
-		renderer->drawCircleCollider(&c1, { 1,1,1,1 });
+		//renderer->drawCircleCollider(&c1, { 1,1,1,1 });
 
-		RayCastHit rch;
-		if (world.boxRayCast(c1.position, { -1,-1 }, boxCollider, rch))
+		//RayCastHit rch;
+		//vec2 dir = { cosf(elapsedTime), sinf(elapsedTime) };
+		//if (world.boxRayCast(c1.position, dir, boxCollider, rch))
+		//{
+		//	renderer->drawLine(c1.position, rch.position, 0.05f, true, { 1,0,0,1 });
+		//}
+		//else
+		//{
+		//	renderer->drawLine(c1.position, c1.position + 100.0f*dir, 0.05f, true, {0,1,0,1});
+		//}
+
+		ContactInfo ci;
+		ci.a = &boxCollider;
+		ci.b = &c1;
+		if (world.boxCircleOverlap(boxCollider, c1, ci))
 		{
-			renderer->drawLine(c1.position, rch.position, 0.05f, true, { 1,0,0,1 });
+			renderer->drawCircleCollider(&c1, { 1,0,0,1 });
+			renderer->drawCircle(ci.points[0], 0.05f, 0.0f, { 0,0,0,1 }, false);
 		}
 		else
-		{
-			renderer->drawLine(c1.position, c1.position + vec2{-100, -100}, 0.05f, true, {0,1,0,1});
-		}
+			renderer->drawCircleCollider(&c1, { 1,1,1,1 });
 
 	}
 };

@@ -156,34 +156,79 @@ struct PhysicsWorld
 		vec2 up = a.getLocalY();
 		vec2 dp = b.position - a.position;
 
-		float rightDist = fabsf(Dot(right, dp));
-		float upDist = fabsf(Dot(up, dp));
+		float rightDist = (Dot(right, dp));
+		float upDist = (Dot(up, dp));
 		
-		float penetration = rightDist - (a.halfExtents.x + b.radius);
+		float penetration = fabsf(rightDist) - (a.halfExtents.x + b.radius);
 		if (penetration > 0)
 			return false;
 		ci.minimumPenetration = penetration;
-		bool isRight;
+		bool horizontal = true;
 
-		penetration = upDist - (a.halfExtents.y + b.radius);
+		penetration = fabsf(upDist) - (a.halfExtents.y + b.radius);
 		if (penetration > 0)
 			return false;
 		if (penetration > ci.minimumPenetration)
 		{
 			ci.minimumPenetration = penetration;
-			isRight = false;
+			horizontal = false;
 		}
 
-		if (isRight)
+		RayCastHit rch;
+		if (horizontal)
 		{
+			if (rightDist > 0)
+			{
+				//b is to right of box a
+				if (boxRayCast(b.position, -right, a, rch))
+				{
+					ci.normal = right;
+					ci.points.push_back(rch.position);
 
+					return true;
+				}
+			}
+			else
+			{
+				//b is to left of box a
+				if (boxRayCast(b.position, right, a, rch))
+				{
+					ci.points.push_back(rch.position);
+					return true;
+				}
+			}
 		}
 		else
 		{
-
+			if (upDist > 0)
+			{
+				//b is above box a
+				if (boxRayCast(b.position, -up, a, rch))
+				{
+					ci.points.push_back(rch.position);
+					return true;
+				}
+			}
+			else
+			{
+				//b is beneath box a
+				if (boxRayCast(b.position, up, a, rch))
+				{
+					ci.points.push_back(rch.position);
+					return true;
+				}
+			}
 		}
 
-		return true;
+		vec2 closestVert = copysignf(1.0f, rightDist) * right * a.halfExtents.x + copysignf(1.0f, upDist) * up * a.halfExtents.y;
+		if ((closestVert - b.position).mag() <= b.radius)
+		{
+			//the closest vert is inside the circle
+			ci.points.push_back(closestVert);
+			return true;
+		}
+
+		return false;
 	}
 
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)

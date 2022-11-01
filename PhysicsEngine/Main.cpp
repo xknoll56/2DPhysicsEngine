@@ -15,6 +15,7 @@ float SCREEN_WIDTH = 1024;
 float SCREEN_HEIGHT = 576;
 #define DEBUG_BUILD
 float aspect;
+float elapsedTime;
 
 HWND hwnd;
 
@@ -23,6 +24,7 @@ ID2D1SolidColorBrush* pBrush = NULL;
 
 
 #include "vec.h"
+#include "Time.h"
 #include "RigidBody.h"
 #include "Collider.h"
 #include "SquareSpace.h"
@@ -227,6 +229,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 				QueryPerformanceCounter(&perfCount);
 
 				currentTimeInSeconds = (double)(perfCount.QuadPart - startPerfCount) / (double)perfCounterFrequency;
+				elapsedTime = currentTimeInSeconds;
 				dt = (float)(currentTimeInSeconds - previousTimeInSeconds);
 				//if (dt > (1.f / 60.f))
 				//	dt = (1.f / 60.f);
