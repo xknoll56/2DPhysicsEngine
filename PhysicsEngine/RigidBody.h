@@ -82,4 +82,10 @@ struct RigidBody
 		this->momentum = velocity * mass;
 		this->velocity = velocity;
 	}
+
+	void setAngularVelocity(float angularVelocity)
+	{
+		this->angularMomentum = angularVelocity * inertia;
+		this->angularVelocity = angularVelocity;
+	}
 };

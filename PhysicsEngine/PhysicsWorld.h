@@ -279,6 +279,51 @@ struct PhysicsWorld
 		b.addTorque(torqueB);
 	}
 
+	void staticBoxDynamiCircleResponse(ContactInfo& ci, float dt)
+	{
+		BoxCollider& a = *dynamic_cast<BoxCollider*>(ci.a);
+		CircleCollider& b = *dynamic_cast<CircleCollider*>(ci.b);
+		
+		if (b.isDynamic)
+			b.position += ci.penetration * ci.normal;
+
+		float epsilon = 0.5f;
+
+		//vec2 ra = ci.points[0] - a.position;
+		vec2 rb = ci.points[0] - b.position;
+		//vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
+		vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
+
+		float vRel = Dot(ci.normal, pb );
+		float numerator = (1 - epsilon) * vRel;
+
+		//float t1 = 1 / a.mass;
+		float t2 = 1 / b.mass;
+		//float t3 = ra.mag() * ra.mag() / a.inertia;
+		float t4 = rb.mag() * rb.mag() / b.inertia;
+
+		float j = numerator / (t2 + t4);
+		vec2 force = ci.normal * j * (1.0f / dt);
+
+		std::cout << j << std::endl;
+
+		if (fabsf(j) > 0.5f)
+		{
+			b.addForce(-force);
+			vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
+			vec2 vt = b.velocity - vn;
+			float torqueB = -copysign(1.0f, Cross(vt, ci.normal)) * rb.mag() * force.mag();
+			b.addTorque(torqueB);
+		}
+		else
+		{
+			vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
+			vec2 vt = b.velocity - vn;
+			b.setVelocity(vt);
+			b.setAngularVelocity( ( - copysign(1.0f, Cross(vt, ci.normal)) / b.radius)* vt.mag());
+		}
+	}
+
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)
 	{
 		vec2 dp = b.position - a.position;
@@ -401,7 +446,12 @@ struct PhysicsWorld
 
 		for (int k = 0; k < circleBoxColliderPairs.size(); k++)
 		{
-			boxCircleResponse(circleBoxColliderPairs[k], dt);
+			BoxCollider& ac = *dynamic_cast<BoxCollider*>(circleBoxColliderPairs[k].a);
+			CircleCollider& bc = *dynamic_cast<CircleCollider*>(circleBoxColliderPairs[k].b);
+			if (ac.isDynamic && bc.isDynamic)
+				boxCircleResponse(circleBoxColliderPairs[k], dt);
+			else if (!ac.isDynamic && bc.isDynamic)
+				staticBoxDynamiCircleResponse(circleBoxColliderPairs[k], dt);
 		}
 	}
 };
