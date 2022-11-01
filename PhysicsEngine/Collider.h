@@ -31,11 +31,17 @@ struct AABB
 enum ColliderType
 {
 	CIRCLE = 0,
-	BOX = 1
+	BOX = 1,
+	NONE = 2
 };
 struct Collider : RigidBody
 {
-	ColliderType type;
+	ColliderType type = ColliderType::NONE;
+
+	virtual ColliderType getType()
+	{
+		return type;
+	}
 };
 
 

@@ -38,11 +38,17 @@ public:
 			c1.setVelocity({ 0, -3 });
 		if (keys[KEY_L])
 			c1.setVelocity({ 3, 0 });
+		renderer->drawCircleCollider(&c1, { 1,1,1,1 });
 
-		if(!world.boxCircleOverlap(boxCollider, c1))
-			renderer->drawCircleCollider(&c1, { 1,1,1,1 });
+		RayCastHit rch;
+		if (world.boxRayCast(c1.position, { -1,-1 }, boxCollider, rch))
+		{
+			renderer->drawLine(c1.position, rch.position, 0.05f, true, { 1,0,0,1 });
+		}
 		else
-			renderer->drawCircleCollider(&c1, { 1,0,0,1 });
+		{
+			renderer->drawLine(c1.position, c1.position + vec2{-100, -100}, 0.05f, true, {0,1,0,1});
+		}
 
 	}
 };

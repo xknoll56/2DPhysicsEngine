@@ -1,17 +1,5 @@
 #pragma once
 
-struct CircleColliderPair
-{
-	CircleCollider* a;
-	CircleCollider* b;
-};
-
-struct CircleBoxColliderPair
-{
-	BoxCollider* a;
-	CircleCollider* b;
-};
-
 struct RayCastHit
 {
 	vec2 position;
@@ -23,19 +11,22 @@ struct ContactInfo
 {
 	std::vector<vec2> points;
 	vec2 normal;
-	float minimumPenetration
+	float minimumPenetration;
+	Collider* a;
+	Collider* b;
 };
 
 struct PhysicsWorld
 {
 	std::vector<BoxCollider*> boxColliders;
 	std::vector<CircleCollider*> circleColliders;
-	std::vector<CircleColliderPair> circleColliderPairs;
-	std::vector<CircleBoxColliderPair> circleBoxColliderPairs;
+	std::vector<ContactInfo> circleColliderPairs;
+	std::vector<ContactInfo> circleBoxColliderPairs;
 	float restitution = 0.4f;
 
 	bool circleRayCast(vec2 position, vec2 direction, const CircleCollider& cc, RayCastHit& rch)
 	{
+		direction.normalize();
 		vec2 dirPerp = { -direction.y, direction.x };
 		vec2 dp = cc.position - position;
 
@@ -61,7 +52,105 @@ struct PhysicsWorld
 		return false;
 	}
 
-	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b)
+	//p point 1
+	//r direction of point 1
+	//q point 2
+	//s direction of point 2
+	bool lineLineIntersection(vec2& intersection, vec2 p, vec2 r, vec2 q, vec2 s)
+	{
+		float denom = Cross(r, s);
+		if (denom == std::numeric_limits<float>::infinity())
+			return false;
+		float t = Cross(q - p, s) / Cross(r, s);
+		float u = Cross(q - p, r) / Cross(r, s);
+
+		intersection = p + t * r;
+		if(t>=0.0f && u>=0.0f)
+			return true;
+		return false;
+	}
+
+	bool boxRayCast(vec2 position, vec2 direction, const BoxCollider& bc, RayCastHit& rch)
+	{
+		bool doesHit = false;
+		direction.normalize();
+		vec2 right = bc.getLocalX();
+		vec2 up = bc.getLocalY();
+		float minDist = std::numeric_limits<float>::infinity();
+
+		vec2 bottomLeftPos = -bc.halfExtents.x * right - bc.halfExtents.y * up;
+		vec2 topRightPos = bc.halfExtents.x * right + bc.halfExtents.y * up;
+
+		vec2 intersection;
+		if (lineLineIntersection(intersection, position, direction, bottomLeftPos, up))
+		{
+			vec2 pointOnLine = intersection - bottomLeftPos;
+			if (pointOnLine.mag() <= bc.halfExtents.y * 2.0f)
+			{
+				minDist = (intersection - position).mag();
+				rch.dist = minDist;
+				rch.position = intersection;
+				rch.normal = -right;
+				doesHit = true;
+			}
+		}
+
+		if (lineLineIntersection(intersection, position, direction, bottomLeftPos, right))
+		{
+			vec2 pointOnLine = intersection - bottomLeftPos;
+			if (pointOnLine.mag() <= bc.halfExtents.x*2.0f)
+			{
+				float dist = (intersection - position).mag();
+				if (dist < minDist)
+				{
+					minDist = dist;
+					rch.dist = minDist;
+					rch.position = intersection;
+					rch.normal = -up;
+					doesHit = true;
+				}
+			}
+		}
+
+		if (lineLineIntersection(intersection, position, direction, topRightPos, -up))
+		{
+			vec2 pointOnLine = intersection - topRightPos;
+			if (pointOnLine.mag() <= bc.halfExtents.y * 2.0f)
+			{
+				float dist = (intersection - position).mag();
+				if (dist < minDist)
+				{
+					minDist = dist;
+					rch.dist = minDist;
+					rch.position = intersection;
+					rch.normal = right;
+					doesHit = true;
+				}
+			}
+		}
+
+		if (lineLineIntersection(intersection, position, direction, topRightPos, -right))
+		{
+			vec2 pointOnLine = intersection - topRightPos;
+			if (pointOnLine.mag() <= bc.halfExtents.x * 2.0f)
+			{
+				float dist = (intersection - position).mag();
+				if (dist < minDist)
+				{
+					minDist = dist;
+					rch.dist = minDist;
+					rch.position = intersection;
+					rch.normal = up;
+					doesHit = true;
+				}
+			}
+		}
+
+		return doesHit;
+	}
+
+
+	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b, ContactInfo& ci)
 	{
 		vec2 right = a.getLocalX();
 		vec2 up = a.getLocalY();
@@ -69,14 +158,30 @@ struct PhysicsWorld
 
 		float rightDist = fabsf(Dot(right, dp));
 		float upDist = fabsf(Dot(up, dp));
-
-		if (rightDist > (a.halfExtents.x + b.radius))
+		
+		float penetration = rightDist - (a.halfExtents.x + b.radius);
+		if (penetration > 0)
 			return false;
+		ci.minimumPenetration = penetration;
+		bool isRight;
 
-		if (upDist > (a.halfExtents.y + b.radius))
+		penetration = upDist - (a.halfExtents.y + b.radius);
+		if (penetration > 0)
 			return false;
+		if (penetration > ci.minimumPenetration)
+		{
+			ci.minimumPenetration = penetration;
+			isRight = false;
+		}
 
+		if (isRight)
+		{
 
+		}
+		else
+		{
+
+		}
 
 		return true;
 	}
@@ -142,6 +247,9 @@ struct PhysicsWorld
 				{
 					CircleCollider* a = circleColliders[i];
 					CircleCollider* b = circleColliders[j];
+					ContactInfo ci;
+					ci.a = a;
+					ci.b = b;
 					if (circleCircleOverlap(*a, *b))
 					{
 
@@ -159,7 +267,7 @@ struct PhysicsWorld
 
 						if (!pairFound)
 						{
-							circleColliderPairs.push_back(CircleColliderPair{ a,b });
+							circleColliderPairs.push_back(ci);
 						}
 					}
 				}
@@ -173,9 +281,12 @@ struct PhysicsWorld
 			{
 				BoxCollider* a = boxColliders[i];
 				CircleCollider* b = circleColliders[j];
-				if (boxCircleOverlap(*a, *b))
+				ContactInfo ci;
+				ci.a = a;
+				ci.b = b;
+				if (boxCircleOverlap(*a, *b, ci))
 				{
-					circleBoxColliderPairs.push_back(CircleBoxColliderPair{ a,b });
+					circleBoxColliderPairs.push_back(ci);
 				}
 
 			}
@@ -184,7 +295,9 @@ struct PhysicsWorld
 		//handle the collisions
 		for (int k = 0; k < circleColliderPairs.size(); k++)
 		{
-			circleCircleResponse(dt, *circleColliderPairs[k].a, *circleColliderPairs[k].b);
+			CircleCollider& ac = *dynamic_cast<CircleCollider*>(circleColliderPairs[k].a);
+			CircleCollider& bc = *dynamic_cast<CircleCollider*>(circleColliderPairs[k].b);
+			circleCircleResponse(dt, ac, bc);
 		}
 	}
 };
