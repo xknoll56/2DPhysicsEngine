@@ -11,7 +11,7 @@ struct ContactInfo
 {
 	std::vector<vec2> points;
 	vec2 normal;
-	float minimumPenetration;
+	float penetration;
 	Collider* a;
 	Collider* b;
 };
@@ -23,6 +23,7 @@ struct PhysicsWorld
 	std::vector<ContactInfo> circleColliderPairs;
 	std::vector<ContactInfo> circleBoxColliderPairs;
 	float restitution = 0.4f;
+	bool useGravity = true;
 
 	bool circleRayCast(vec2 position, vec2 direction, const CircleCollider& cc, RayCastHit& rch)
 	{
@@ -78,8 +79,8 @@ struct PhysicsWorld
 		vec2 up = bc.getLocalY();
 		float minDist = std::numeric_limits<float>::infinity();
 
-		vec2 bottomLeftPos = -bc.halfExtents.x * right - bc.halfExtents.y * up;
-		vec2 topRightPos = bc.halfExtents.x * right + bc.halfExtents.y * up;
+		vec2 bottomLeftPos = bc.position + -bc.halfExtents.x * right - bc.halfExtents.y * up;
+		vec2 topRightPos = bc.position + bc.halfExtents.x * right + bc.halfExtents.y * up;
 
 		vec2 intersection;
 		if (lineLineIntersection(intersection, position, direction, bottomLeftPos, up))
@@ -162,15 +163,15 @@ struct PhysicsWorld
 		float penetration = fabsf(rightDist) - (a.halfExtents.x + b.radius);
 		if (penetration > 0)
 			return false;
-		ci.minimumPenetration = penetration;
+		ci.penetration = penetration;
 		bool horizontal = true;
 
 		penetration = fabsf(upDist) - (a.halfExtents.y + b.radius);
 		if (penetration > 0)
 			return false;
-		if (penetration > ci.minimumPenetration)
+		if (penetration > ci.penetration)
 		{
-			ci.minimumPenetration = penetration;
+			ci.penetration = penetration;
 			horizontal = false;
 		}
 
@@ -184,7 +185,7 @@ struct PhysicsWorld
 				{
 					ci.normal = right;
 					ci.points.push_back(rch.position);
-
+					ci.penetration = b.radius - (rch.position - b.position).mag();
 					return true;
 				}
 			}
@@ -194,6 +195,8 @@ struct PhysicsWorld
 				if (boxRayCast(b.position, right, a, rch))
 				{
 					ci.points.push_back(rch.position);
+					ci.normal = -right;
+					ci.penetration = b.radius - (rch.position - b.position).mag();
 					return true;
 				}
 			}
@@ -206,6 +209,8 @@ struct PhysicsWorld
 				if (boxRayCast(b.position, -up, a, rch))
 				{
 					ci.points.push_back(rch.position);
+					ci.normal = up;
+					ci.penetration = b.radius - (rch.position - b.position).mag();
 					return true;
 				}
 			}
@@ -215,16 +220,21 @@ struct PhysicsWorld
 				if (boxRayCast(b.position, up, a, rch))
 				{
 					ci.points.push_back(rch.position);
+					ci.normal = -up;
+					ci.penetration = b.radius - (rch.position - b.position).mag();
 					return true;
 				}
 			}
 		}
 
-		vec2 closestVert = copysignf(1.0f, rightDist) * right * a.halfExtents.x + copysignf(1.0f, upDist) * up * a.halfExtents.y;
+		vec2 closestVert = a.position + copysignf(1.0f, rightDist) * right * a.halfExtents.x + copysignf(1.0f, upDist) * up * a.halfExtents.y;
 		if ((closestVert - b.position).mag() <= b.radius)
 		{
 			//the closest vert is inside the circle
 			ci.points.push_back(closestVert);
+			ci.normal = b.position - closestVert;
+			ci.penetration = b.radius - ci.normal.mag();
+			ci.normal.normalize();
 			return true;
 		}
 
@@ -275,10 +285,16 @@ struct PhysicsWorld
 	void step(float dt)
 	{
 		for (int i = 0; i < circleColliders.size(); i++)
+		{
+			circleColliders[i]->useGravity = useGravity;
 			circleColliders[i]->step(dt);
+		}
 
 		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			boxColliders[i]->useGravity = useGravity;
 			boxColliders[i]->step(dt);
+		}
 
 		circleColliderPairs.clear();
 		circleBoxColliderPairs.clear();
