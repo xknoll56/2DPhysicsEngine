@@ -9,7 +9,7 @@ class Renderer
 public:
 
 
-	float camWidth = 10;
+	float camWidth = 20;
 	vec2 camPos;
 
 	void drawBox(vec2 position, vec2 scale, float angle, RGBA color)

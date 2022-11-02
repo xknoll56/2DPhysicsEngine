@@ -25,5 +25,9 @@ public:
 			renderer->camPos += vec2(0, -5.0f * dt);
 		if (keys[KEY_D])
 			renderer->camPos += vec2(5.0f * dt, 0);
+		if (keys[KEY_Q])
+			renderer->camWidth -= 5.0f*dt;
+		if (keys[KEY_E])
+			renderer->camWidth += 5.0f*dt;
 	}
 };

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <d2d1.h>
+#include <dwrite.h>
 #include <random>
 
 typedef int int32;
@@ -220,6 +221,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		scene.setup();
 		brs.setup();
 
+		//setup text rendering
+		IDWriteTextFormat* d2d_text_format;
+		IDWriteFactory* writeFactory;
+		DWriteCreateFactory(
+			DWRITE_FACTORY_TYPE_SHARED,
+			__uuidof(IDWriteFactory),
+			reinterpret_cast<IUnknown**>(&writeFactory)
+		);
+		writeFactory->CreateTextFormat(
+			L"Courier",                // Font family name.
+			NULL,                       // Font collection (NULL sets it to use the system font collection).
+			DWRITE_FONT_WEIGHT_REGULAR,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			24.0f,
+			L"en-us",
+			&d2d_text_format
+		);
+		D2D_RECT_F writeRect;
+		writeRect.bottom = rc.bottom;
+		writeRect.top = rc.top;
+		writeRect.left = rc.left;
+		writeRect.right = rc.right;
+		CONST D2D_MATRIX_3X2_F identity = D2D1::Matrix3x2F::Identity();
 
 		bool running = true;
 		while (running)
@@ -251,8 +276,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
 
 			brs.update(dt);
-			//renderer.DrawCapsule({ 0,0 }, 1.0f, 0.5f, currentTimeInSeconds, { 1,1,1,1 });
 
+			
+			pRT->SetTransform(identity);
+			pBrush->SetColor(D2D1::ColorF(1,1,1,1));
+			pRT->DrawTextW(L"Hello World!", 12, d2d_text_format, &writeRect, pBrush);
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
 				std::cout << "Failed to draw" << std::endl;

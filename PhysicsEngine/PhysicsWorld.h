@@ -23,6 +23,7 @@ struct PhysicsWorld
 	std::vector<ContactInfo> circleColliderPairs;
 	std::vector<ContactInfo> circleBoxColliderPairs;
 	float restitution = 0.4f;
+	float epsilon = 0.5f;
 	bool useGravity = true;
 
 	bool circleRayCast(vec2 position, vec2 direction, const CircleCollider& cc, RayCastHit& rch)
@@ -243,14 +244,13 @@ struct PhysicsWorld
 
 	void boxCircleResponse(ContactInfo& ci, float dt)
 	{
-		BoxCollider& a = *dynamic_cast<BoxCollider*>(ci.a);
-		CircleCollider& b = *dynamic_cast<CircleCollider*>(ci.b);
+		BoxCollider& a = *static_cast<BoxCollider*>(ci.a);
+		CircleCollider& b = *static_cast<CircleCollider*>(ci.b);
 		if(a.isDynamic)
 			a.position -= ci.penetration * 0.5f * ci.normal;
 		if(b.isDynamic)
 			b.position += ci.penetration * 0.5f * ci.normal;
 
-		float epsilon = 0.5f;
 
 		vec2 ra = ci.points[0] - a.position;
 		vec2 rb = ci.points[0] - b.position;
@@ -281,13 +281,11 @@ struct PhysicsWorld
 
 	void staticBoxDynamiCircleResponse(ContactInfo& ci, float dt)
 	{
-		BoxCollider& a = *dynamic_cast<BoxCollider*>(ci.a);
-		CircleCollider& b = *dynamic_cast<CircleCollider*>(ci.b);
+		BoxCollider& a = *static_cast<BoxCollider*>(ci.a);
+		CircleCollider& b = *static_cast<CircleCollider*>(ci.b);
 		
 		if (b.isDynamic)
 			b.position += ci.penetration * ci.normal;
-
-		float epsilon = 0.5f;
 
 		//vec2 ra = ci.points[0] - a.position;
 		vec2 rb = ci.points[0] - b.position;
@@ -305,9 +303,8 @@ struct PhysicsWorld
 		float j = numerator / (t2 + t4);
 		vec2 force = ci.normal * j * (1.0f / dt);
 
-		std::cout << j << std::endl;
 
-		if (fabsf(j) > 0.5f)
+		if (fabsf(j) > restitution)
 		{
 			b.addForce(-force);
 			vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
@@ -347,7 +344,6 @@ struct PhysicsWorld
 
 
 		float mag = Dot(dp, relMomentum);
-		float restitution = 0.4f;
 		if (mag > 0)
 		{
 			vec2 relMomentumNorm = mag * dp * restitution;
@@ -439,18 +435,18 @@ struct PhysicsWorld
 		//handle the collisions
 		for (int k = 0; k < circleColliderPairs.size(); k++)
 		{
-			CircleCollider& ac = *dynamic_cast<CircleCollider*>(circleColliderPairs[k].a);
-			CircleCollider& bc = *dynamic_cast<CircleCollider*>(circleColliderPairs[k].b);
-			circleCircleResponse(dt, ac, bc);
+			CircleCollider& a = *static_cast<CircleCollider*>(circleColliderPairs[k].a);
+			CircleCollider& b = *static_cast<CircleCollider*>(circleColliderPairs[k].b);
+			circleCircleResponse(dt, a, b);
 		}
 
 		for (int k = 0; k < circleBoxColliderPairs.size(); k++)
 		{
-			BoxCollider& ac = *dynamic_cast<BoxCollider*>(circleBoxColliderPairs[k].a);
-			CircleCollider& bc = *dynamic_cast<CircleCollider*>(circleBoxColliderPairs[k].b);
-			if (ac.isDynamic && bc.isDynamic)
+			BoxCollider& a = *static_cast<BoxCollider*>(circleBoxColliderPairs[k].a);
+			CircleCollider& b = *static_cast<CircleCollider*>(circleBoxColliderPairs[k].b);
+			if (a.isDynamic && b.isDynamic)
 				boxCircleResponse(circleBoxColliderPairs[k], dt);
-			else if (!ac.isDynamic && bc.isDynamic)
+			else if (!a.isDynamic && b.isDynamic)
 				staticBoxDynamiCircleResponse(circleBoxColliderPairs[k], dt);
 		}
 	}
