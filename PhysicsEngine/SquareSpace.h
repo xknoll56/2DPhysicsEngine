@@ -73,13 +73,13 @@ public:
 		if(i>=0)
 			indices.push_back(i);
 		i = getContainmentSquareIndex(aabb.bottomRightExtent);
-		if(i>=0)
+		if(i>=0 && !(std::find(indices.begin(), indices.end(), i) != indices.end()))
 			indices.push_back(i);
 		i = getContainmentSquareIndex(aabb.topLeftExtent);
-		if(i>=0)
+		if(i>=0 && !(std::find(indices.begin(), indices.end(), i) != indices.end()))
 			indices.push_back(i);
 		i = getContainmentSquareIndex(aabb.topRightExtent);
-		if(i>=0)
+		if(i>=0 && !(std::find(indices.begin(), indices.end(), i) != indices.end()))
 			indices.push_back(i);
 		return indices;
 	}

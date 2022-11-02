@@ -372,12 +372,24 @@ struct PhysicsWorld
 
 	}
 
+	bool containsPair(std::vector< ContactInfo>& contactInfos, Collider* a, Collider* b)
+	{
+		bool pairFound = false;
+		for (int i = 0; i < contactInfos.size(); i++)
+		{
+			if ((contactInfos[i].a == a && contactInfos[i].b == b) || contactInfos[i].a == b && contactInfos[i].b == a)
+			{
+				pairFound = true;
+				break;
+			}
+		}
+		return pairFound;
+	}
+
 	void stepSquare(float dt, SquareSpace::Square& square)
 	{
 		std::vector<BoxCollider*> boxColliders;
 		std::vector<CircleCollider*> circleColliders;
-		std::vector<ContactInfo> circleColliderPairs;
-		std::vector<ContactInfo> circleBoxColliderPairs;
 
 		for (std::list<Collider*>::const_iterator it = square.colliders.begin(); it != square.colliders.end(); it++)
 		{
@@ -398,20 +410,7 @@ struct PhysicsWorld
 			}
 		}
 
-		for (int i = 0; i < circleColliders.size(); i++)
-		{
-			circleColliders[i]->useGravity = useGravity;
-			circleColliders[i]->step(dt);
-		}
 
-		for (int i = 0; i < boxColliders.size(); i++)
-		{
-			boxColliders[i]->useGravity = useGravity;
-			boxColliders[i]->step(dt);
-		}
-
-		circleColliderPairs.clear();
-		circleBoxColliderPairs.clear();
 
 		//handle all circle circle collision
 		for (int i = 0; i < circleColliders.size(); i++)
@@ -427,23 +426,10 @@ struct PhysicsWorld
 					ci.b = b;
 					if (circleCircleOverlap(*a, *b))
 					{
-
 						//if the circles overlap, see if the pair is already found and
 						//if not add it to the vector/list
-						bool pairFound = false;
-						for (int k = 0; k < circleColliderPairs.size(); k++)
-						{
-							if ((circleColliderPairs[k].a == a && circleColliderPairs[k].b == b) || circleColliderPairs[k].a == b && circleColliderPairs[k].b == a)
-							{
-								pairFound = true;
-								break;
-							}
-						}
-
-						if (!pairFound)
-						{
+						if (!containsPair(circleColliderPairs, a, b))
 							circleColliderPairs.push_back(ci);
-						}
 					}
 				}
 			}
@@ -461,13 +447,69 @@ struct PhysicsWorld
 				ci.b = b;
 				if (boxCircleOverlap(*a, *b, ci))
 				{
-					circleBoxColliderPairs.push_back(ci);
+					//if the circles overlap, see if the pair is already found and
+						//if not add it to the vector/list
+					if(!containsPair(circleBoxColliderPairs, a, b))
+						circleBoxColliderPairs.push_back(ci);
 				}
 
 			}
 		}
+	}
 
-		//handle the collisions
+	void step(float dt)
+	{
+		circleBoxColliderPairs.clear();
+		circleColliderPairs.clear();
+		//clear all squares colliders
+		for (int i = 0; i < squareSpace->squares.size(); i++)
+		{
+			SquareSpace::Square& square = squareSpace->squares[i];
+			square.colliders.clear();
+		}
+
+		//move all object
+		for (int i = 0; i < circleColliders.size(); i++)
+		{
+			circleColliders[i]->useGravity = useGravity;
+			circleColliders[i]->step(dt);
+		}
+
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			boxColliders[i]->useGravity = useGravity;
+			boxColliders[i]->step(dt);
+		}
+		
+		//insert the colliders into the squares they belong to
+		for (int i = 0; i < circleColliders.size(); i++)
+		{
+			circleColliders[i]->setAABB();
+			std::list<int> sis = squareSpace->getContainmentSquareIndices(circleColliders[i]->aabb);
+			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
+			{
+				squareSpace->squares[*it].colliders.push_back(circleColliders[i]);
+			}
+		}
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			boxColliders[i]->setAABB();
+			std::list<int> sis = squareSpace->getContainmentSquareIndices(boxColliders[i]->aabb);
+			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
+			{
+				squareSpace->squares[*it].colliders.push_back(boxColliders[i]);
+			}
+		}
+
+		//solve each of the squares
+		for (int i = 0; i < squareSpace->squares.size(); i++)
+		{
+			SquareSpace::Square& square = squareSpace->squares[i];
+			stepSquare(dt, square);
+		}
+
+		//handle collsions
+				//handle the collisions
 		for (int k = 0; k < circleColliderPairs.size(); k++)
 		{
 			CircleCollider& a = *static_cast<CircleCollider*>(circleColliderPairs[k].a);
@@ -483,43 +525,6 @@ struct PhysicsWorld
 				boxCircleResponse(circleBoxColliderPairs[k], dt);
 			else if (!a.isDynamic && b.isDynamic)
 				staticBoxDynamiCircleResponse(circleBoxColliderPairs[k], dt);
-		}
-	}
-
-	void step(float dt)
-	{
-		//clear all squares colliders
-		for (int i = 0; i < squareSpace->squares.size(); i++)
-		{
-			SquareSpace::Square& square = squareSpace->squares[i];
-			square.colliders.clear();
-		}
-		
-		//insert the colliders into the squares they belong to
-		for (int i = 0; i < circleColliders.size(); i++)
-		{
-			circleColliders[i]->setAABB();
-			std::list<int> sis = squareSpace->getContainmentSquareIndices(circleColliders[i]->aabb);
-			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
-			{
-				squareSpace->squares[i].colliders.push_back(circleColliders[i]);
-			}
-		}
-		for (int i = 0; i < boxColliders.size(); i++)
-		{
-			boxColliders[i]->setAABB();
-			std::list<int> sis = squareSpace->getContainmentSquareIndices(boxColliders[i]->aabb);
-			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
-			{
-				squareSpace->squares[i].colliders.push_back(boxColliders[i]);
-			}
-		}
-
-		//solve each of the squares
-		for (int i = 0; i < squareSpace->squares.size(); i++)
-		{
-			SquareSpace::Square& square = squareSpace->squares[i];
-			stepSquare(dt, square);
 		}
 	}
 

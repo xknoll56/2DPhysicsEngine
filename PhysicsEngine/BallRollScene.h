@@ -19,6 +19,8 @@ public:
 		boxCollider.halfExtents = { 7.5f, 0.1f };
 		boxCollider.angle = 3.14159f / 5.0f;
 		boxCollider1.halfExtents = { 7.5f, 0.1f };
+		boxCollider1.aabb.halfExtents = { 7.5f, 7.5f };
+		boxCollider.aabb.halfExtents = { 7.5f, 7.5f };
 		boxCollider1.angle = -3.14159f / 5.0f;
 		boxCollider1.position = { -5, -10 };
 		world.boxColliders.push_back(&boxCollider);
@@ -35,23 +37,24 @@ public:
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
-		world.step(dt);
+		world.step(0.017);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 		renderer->drawBoxCollider(&boxCollider1, { 1,1,1,1 });
 		renderer->drawCircleCollider(&circleCollider, { 1,1,1,1 });
 		drawSquareSpace(*squareSpace);
 
 
-		circleCollider.setAABB();
-		renderer->drawBox(circleCollider.aabb.center, circleCollider.aabb.halfExtents, 0.0f, false, { 0,1,0,1 });
+		//circleCollider.setAABB();
+		renderer->drawBox(circleCollider.aabb.center, circleCollider.aabb.halfExtents, 0.0f, false, { 1,0,0,1 });
+		renderer->drawBox(boxCollider1.aabb.center, boxCollider.aabb.halfExtents, 0.0f, false, { 1, 0, 0, 1 });
+		renderer->drawBox(boxCollider.aabb.center, boxCollider.aabb.halfExtents, 0.0f, false, { 1, 0, 0, 1 });
 
-
-		std::list<int> sis = squareSpace->getContainmentSquareIndices(circleCollider.aabb);
-		for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
-		{
-			AABB curSquare = squareSpace->squares[*it].aabb;
-			renderer->drawAABB(curSquare, { 1,0,0,1 });
-		}
+		//std::list<int> sis = squareSpace->getContainmentSquareIndices(circleCollider.aabb);
+		//for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
+		//{
+		//	AABB curSquare = squareSpace->squares[*it].aabb;
+		//	renderer->drawAABB(curSquare, { 1,0,0,1 });
+		//}
 
 	}
 };
