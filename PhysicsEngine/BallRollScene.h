@@ -7,6 +7,7 @@ public:
 	CircleCollider circleCollider;
 	BoxCollider boxCollider;
 	BoxCollider boxCollider1;
+	SquareSpace* squareSpace;
 
 	BallRollScene(Renderer* renderer)
 	{
@@ -27,6 +28,7 @@ public:
 		world.useGravity = true;
 		boxCollider.isDynamic = false;
 		boxCollider1.isDynamic = false;
+		squareSpace = new SquareSpace(2, 2, { -20,-20 }, 20);
 	}
 
 	void update(float dt)
@@ -36,6 +38,22 @@ public:
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 		renderer->drawBoxCollider(&boxCollider1, { 1,1,1,1 });
 		renderer->drawCircleCollider(&circleCollider, { 1,1,1,1 });
+		drawSquareSpace(*squareSpace);
+
+
+		circleCollider.setAABB();
+		renderer->drawBox(circleCollider.aabb.center, circleCollider.aabb.halfExtents, 0.0f, false, { 0,1,0,1 });
+
+
+		std::list<int> sis = squareSpace->getContainmentSquareIndices(circleCollider.aabb);
+		for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
+		{
+			if (*it >= 0)
+			{
+				AABB curSquare = squareSpace->squares[*it];
+				renderer->drawAABB(curSquare, { 1,0,0,1 });
+			}
+		}
 
 	}
 };

@@ -106,5 +106,10 @@ public:
 		drawLine(position, position + up, 0.025f, true, { 1,0,0,1 });
 	}
 
+	void drawAABB(const AABB& aabb, RGBA color)
+	{
+		drawBox(aabb.center, aabb.halfExtents, 0.0f,false, color);
+	}
+
 
 };

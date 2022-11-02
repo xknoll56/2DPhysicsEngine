@@ -30,4 +30,13 @@ public:
 		if (keys[KEY_E])
 			renderer->camWidth += 5.0f*dt;
 	}
+
+	void drawSquareSpace(SquareSpace& squareSpace)
+	{
+		for (int i = 0; i < squareSpace.squares.size(); i++)
+		{
+			AABB aabb = squareSpace.squares[i];
+			renderer->drawBox(aabb.center, aabb.halfExtents, 0.0f, false, { 0,1,0,1 });
+		}
+	}
 };
