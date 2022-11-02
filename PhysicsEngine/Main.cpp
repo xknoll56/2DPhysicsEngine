@@ -280,7 +280,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			
 			pRT->SetTransform(identity);
 			pBrush->SetColor(D2D1::ColorF(1,1,1,1));
-			pRT->DrawTextW(L"Test", 12, d2d_text_format, &writeRect, pBrush);
+			pRT->DrawTextW(L"Test", 4, d2d_text_format, &writeRect, pBrush);
 			HRESULT hr = pRT->EndDraw();
 			if (!SUCCEEDED(hr))
 				std::cout << "Failed to draw" << std::endl;

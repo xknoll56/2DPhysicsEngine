@@ -29,7 +29,7 @@ public:
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
-		world.step(dt);
+		world.stepAll(dt);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 		renderer->drawUnitDirs(boxCollider.position, boxCollider.angle);
 

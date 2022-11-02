@@ -4,10 +4,16 @@
 class SquareSpace
 {
 public:
+	struct Square
+	{
+		AABB aabb;
+		std::list<Collider*> colliders;
+	};
 	float squareSize;
 	int divisionsX;
 	int divisionsY;
-	std::vector<AABB> squares;
+	std::vector<Square> squares;
+	Square outside;
 	vec2 bottomLeftExtent;
 	vec2 topRightExtent;
 	float spaceError = 0.25f;
@@ -35,7 +41,9 @@ public:
 				vec2 ble = bottomLeftExtent + vec2(squareSize * j, squareSize * i);
 				vec2 tre = ble + vec2(squareSize, squareSize);
 				AABB aabb(ble, tre, vec2(squareSize * 0.5f, squareSize * 0.5f));
-				squares.push_back(aabb);
+				Square square;
+				square.aabb = aabb;
+				squares.push_back(square);
 			}
 		}
 
@@ -61,11 +69,18 @@ public:
 	std::list<int> getContainmentSquareIndices(AABB& aabb)
 	{
 		std::list<int> indices;
-
-		indices.push_back(getContainmentSquareIndex(aabb.bottomLeftExtent));
-		indices.push_back(getContainmentSquareIndex(aabb.bottomRightExtent));
-		indices.push_back(getContainmentSquareIndex(aabb.topLeftExtent));
-		indices.push_back(getContainmentSquareIndex(aabb.topRightExtent));
+		int i = getContainmentSquareIndex(aabb.bottomLeftExtent);
+		if(i>=0)
+			indices.push_back(i);
+		i = getContainmentSquareIndex(aabb.bottomRightExtent);
+		if(i>=0)
+			indices.push_back(i);
+		i = getContainmentSquareIndex(aabb.topLeftExtent);
+		if(i>=0)
+			indices.push_back(i);
+		i = getContainmentSquareIndex(aabb.topRightExtent);
+		if(i>=0)
+			indices.push_back(i);
 		return indices;
 	}
 	

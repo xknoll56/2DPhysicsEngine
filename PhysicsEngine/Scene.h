@@ -35,7 +35,7 @@ public:
 	{
 		for (int i = 0; i < squareSpace.squares.size(); i++)
 		{
-			AABB aabb = squareSpace.squares[i];
+			AABB aabb = squareSpace.squares[i].aabb;
 			renderer->drawBox(aabb.center, aabb.halfExtents, 0.0f, false, { 0,1,0,1 });
 		}
 	}

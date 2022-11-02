@@ -29,6 +29,7 @@ public:
 		boxCollider.isDynamic = false;
 		boxCollider1.isDynamic = false;
 		squareSpace = new SquareSpace(2, 2, { -20,-20 }, 20);
+		world.squareSpace = squareSpace;
 	}
 
 	void update(float dt)
@@ -48,11 +49,8 @@ public:
 		std::list<int> sis = squareSpace->getContainmentSquareIndices(circleCollider.aabb);
 		for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 		{
-			if (*it >= 0)
-			{
-				AABB curSquare = squareSpace->squares[*it];
-				renderer->drawAABB(curSquare, { 1,0,0,1 });
-			}
+			AABB curSquare = squareSpace->squares[*it].aabb;
+			renderer->drawAABB(curSquare, { 1,0,0,1 });
 		}
 
 	}

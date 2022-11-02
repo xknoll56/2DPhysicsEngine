@@ -9,6 +9,7 @@ struct AABB
 	vec2 topLeftExtent;
 	vec2 bottomRightExtent;
 	bool isOutside = false;
+	std::list<int> squareIndices;
 
 
 	AABB()
