@@ -488,7 +488,10 @@ struct PhysicsWorld
 			std::list<int> sis = squareSpace->getContainmentSquareIndices(circleColliders[i]->aabb);
 			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 			{
-				squareSpace->squares[*it].colliders.push_back(circleColliders[i]);
+				if (*it == -1)
+					squareSpace->outside.colliders.push_back(circleColliders[i]);
+				else
+					squareSpace->squares[*it].colliders.push_back(circleColliders[i]);
 			}
 		}
 		for (int i = 0; i < boxColliders.size(); i++)
@@ -497,7 +500,10 @@ struct PhysicsWorld
 			std::list<int> sis = squareSpace->getContainmentSquareIndices(boxColliders[i]->aabb);
 			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 			{
-				squareSpace->squares[*it].colliders.push_back(boxColliders[i]);
+				if (*it == -1)
+					squareSpace->outside.colliders.push_back(boxColliders[i]);
+				else
+					squareSpace->squares[*it].colliders.push_back(boxColliders[i]);
 			}
 		}
 
@@ -507,6 +513,9 @@ struct PhysicsWorld
 			SquareSpace::Square& square = squareSpace->squares[i];
 			stepSquare(dt, square);
 		}
+
+		//step the outside square
+		stepSquare(dt, squareSpace->outside);
 
 		//handle collsions
 				//handle the collisions

@@ -9,7 +9,6 @@ struct AABB
 	vec2 topLeftExtent;
 	vec2 bottomRightExtent;
 	bool isOutside = false;
-	std::list<int> squareIndices;
 
 
 	AABB()
@@ -112,6 +111,11 @@ struct BoxCollider : Collider
 	{
 		this->halfExtents = halfExtents;
 		type = ColliderType::BOX;
+		aabb.halfExtents = { fmaxf(halfExtents.x, halfExtents.y), fmaxf(halfExtents.x, halfExtents.y) };
+	}
+
+	void setAABBHalfExtents()
+	{
 		aabb.halfExtents = { fmaxf(halfExtents.x, halfExtents.y), fmaxf(halfExtents.x, halfExtents.y) };
 	}
 };

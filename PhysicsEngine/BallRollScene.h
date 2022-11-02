@@ -19,10 +19,10 @@ public:
 		boxCollider.halfExtents = { 7.5f, 0.1f };
 		boxCollider.angle = 3.14159f / 5.0f;
 		boxCollider1.halfExtents = { 7.5f, 0.1f };
-		boxCollider1.aabb.halfExtents = { 7.5f, 7.5f };
-		boxCollider.aabb.halfExtents = { 7.5f, 7.5f };
+		boxCollider1.setAABBHalfExtents();
+		boxCollider.setAABBHalfExtents();
 		boxCollider1.angle = -3.14159f / 5.0f;
-		boxCollider1.position = { -5, -10 };
+		boxCollider1.position = { -10, -20 };
 		world.boxColliders.push_back(&boxCollider);
 		world.boxColliders.push_back(&boxCollider1);
 		circleCollider.position = { 0,10 };
