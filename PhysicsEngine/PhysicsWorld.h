@@ -37,6 +37,7 @@ struct PhysicsWorld
 		
 	}
 
+
 	bool circleRayCast(Vec2 position, Vec2 direction, const CircleCollider& cc, RayCastHit& rch)
 	{
 		direction.normalize();
@@ -511,11 +512,13 @@ struct PhysicsWorld
 		for (int i = 0; i < squareSpace->squares.size(); i++)
 		{
 			SquareSpace::Square& square = squareSpace->squares[i];
-			stepSquare(dt, square);
+			if(square.colliders.size()>0)
+				stepSquare(dt, square);
 		}
 
 		//step the outside square
-		stepSquare(dt, squareSpace->outside);
+		if(squareSpace->outside.colliders.size()>0)
+			stepSquare(dt, squareSpace->outside);
 
 		//handle collsions
 				//handle the collisions

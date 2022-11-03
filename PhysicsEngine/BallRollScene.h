@@ -29,7 +29,7 @@ public:
 		world.useGravity = true;
 		boxCollider.isDynamic = false;
 		boxCollider1.isDynamic = false;
-		squareSpace = new SquareSpace(2, 2, { -20,-20 }, 20);
+		squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
 		world.squareSpace = squareSpace;
 	}
 
@@ -49,7 +49,7 @@ public:
 		renderer->drawBox(boxCollider.aabb.center, boxCollider.aabb.halfExtents, 0.0f, false, { 1, 0, 0, 1 });
 
 
-		std::cout << 1.0f / dt << std::endl;
+		//std::cout << 1.0f / dt << std::endl;
 		//std::list<int> sis = squareSpace->getContainmentSquareIndices(circleCollider.aabb);
 		//for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 		//{

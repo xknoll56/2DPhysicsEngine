@@ -69,18 +69,25 @@ public:
 	std::list<int> getContainmentSquareIndices(AABB& aabb)
 	{
 		std::list<int> indices;
-		int i = getContainmentSquareIndex(aabb.bottomLeftExtent);
-		if(i>=0)
-			indices.push_back(i);
-		i = getContainmentSquareIndex(aabb.bottomRightExtent);
-		if(!(std::find(indices.begin(), indices.end(), i) != indices.end()))
-			indices.push_back(i);
-		i = getContainmentSquareIndex(aabb.topLeftExtent);
-		if(!(std::find(indices.begin(), indices.end(), i) != indices.end()))
-			indices.push_back(i);
-		i = getContainmentSquareIndex(aabb.topRightExtent);
-		if(!(std::find(indices.begin(), indices.end(), i) != indices.end()))
-			indices.push_back(i);
+
+		Vec2 startPos = aabb.bottomLeftExtent;
+		Vec2 endPos = aabb.topRightExtent;
+		int startInd = getContainmentSquareIndex(startPos);
+		indices.push_back(startInd);
+		int endInd = getContainmentSquareIndex(endPos);
+		if(endInd!=startInd)
+			indices.push_back(endInd);
+		for (float x = startPos.x; x < endPos.x; x += squareSize)
+		{
+			for (float y = startPos.y; y < endPos.y; y += squareSize)
+			{
+				Vec2 pos = { x, y };
+				int ind = getContainmentSquareIndex(pos);
+				if (!(std::find(indices.begin(), indices.end(), ind) != indices.end()))
+					indices.push_back(ind);
+			}
+		}
+
 		return indices;
 	}
 	
