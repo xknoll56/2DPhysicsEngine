@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClInclude Include="AABBBoxScene.h" />
     <ClInclude Include="BallRollScene.h" />
+    <ClInclude Include="BoxBoxCollisionScene.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="SquareSpace.h" />
     <ClInclude Include="Input.h" />
@@ -141,7 +142,7 @@
     <ClInclude Include="RigidBody.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="TestScene.h" />
-    <ClInclude Include="vec.h" />
+    <ClInclude Include="Vec.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

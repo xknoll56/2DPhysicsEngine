@@ -34,7 +34,7 @@ struct PhysicsWorld
 
 	PhysicsWorld(int divisionsX, int divisionsY, Vec2 bottomLeftExtent, float farRightExtent)
 	{
-		
+		squareSpace = new SquareSpace(divisionsX, divisionsY, bottomLeftExtent, farRightExtent);
 	}
 
 
@@ -251,6 +251,39 @@ struct PhysicsWorld
 		}
 
 		return false;
+	}
+
+	bool boxBoxOverlap(const BoxCollider& a, const BoxCollider& b, ContactInfo& ci)
+	{
+		Vec2 ax = a.getLocalX();
+		Vec2 ay = a.getLocalY();
+		float wa = a.halfExtents.x;
+		float ha = a.halfExtents.y;
+
+		Vec2 bx = b.getLocalX();
+		Vec2 by = b.getLocalY();
+		float wb = b.halfExtents.x;
+		float hb = b.halfExtents.y;
+
+		Vec2 dp = b.position - a.position;
+
+		float penetration = fabsf(Dot(dp, ax)) - (wa + fabsf(Dot(wb * bx, ax)) + fabsf(Dot(hb * by, ax)));
+		if (penetration > 0.0f)
+			return false;
+
+		penetration = fabsf(Dot(dp, ay)) - (ha + fabsf(Dot(wb * bx, ay)) + fabsf(Dot(hb * by, ay)));
+		if (penetration > 0.0f)
+			return false;
+
+		penetration = fabsf(Dot(dp, bx)) - (wb + fabsf(Dot(wa * ax, bx)) + fabsf(Dot(ha * ay, bx)));
+		if (penetration > 0.0f)
+			return false;
+
+		penetration = fabsf(Dot(dp, by)) - (hb + fabsf(Dot(wa * ax, by)) + fabsf(Dot(ha * ay, by)));
+		if (penetration > 0.0f)
+			return false;
+
+		return true;
 	}
 
 	void boxCircleResponse(ContactInfo& ci, float dt)

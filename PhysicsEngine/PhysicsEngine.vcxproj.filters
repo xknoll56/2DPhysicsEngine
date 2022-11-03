@@ -35,7 +35,7 @@
     <ClInclude Include="Input.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="vec.h">
+    <ClInclude Include="Vec.h">
       <Filter>Physics</Filter>
     </ClInclude>
     <ClInclude Include="RigidBody.h">
@@ -60,6 +60,9 @@
       <Filter>Scene</Filter>
     </ClInclude>
     <ClInclude Include="AABBBoxScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxBoxCollisionScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
   </ItemGroup>
