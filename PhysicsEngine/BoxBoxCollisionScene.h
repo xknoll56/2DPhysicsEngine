@@ -39,8 +39,8 @@ public:
 
 		ContactInfo ci;
 		if (!world.boxBoxOverlap(boxCollider, boxCollider1, ci))
-			renderer->drawBoxCollider(&boxCollider1, { 1,1,1,1 });
+			renderer->drawBoxCollider(&boxCollider1, RGBA::WHITE);
 		else
-			renderer->drawBoxCollider(&boxCollider1, { 1,0,0,1 });
+			renderer->drawBoxCollider(&boxCollider1, RGBA::RED);
 	}
 };

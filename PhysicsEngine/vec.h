@@ -120,6 +120,12 @@ struct RGBA
 {
 	float r, g, b, a;
 
+	static const RGBA WHITE;
+	static const RGBA BLACK;
+	static const RGBA RED;
+	static const RGBA GREEN;
+	static const RGBA BLUE;
+
 	RGBA(float r, float g, float b, float a)
 	{
 		this->r = r;
@@ -128,3 +134,9 @@ struct RGBA
 		this->a = a;
 	}
 };
+
+const RGBA RGBA::WHITE = { 1,1,1,1 };
+const RGBA RGBA::BLACK = { 0,0,0,1 };
+const RGBA RGBA::RED = { 1,0,0,1 };
+const RGBA RGBA::GREEN = { 0,1,0,1 };
+const RGBA RGBA::BLUE = { 0,0,1,1 };
