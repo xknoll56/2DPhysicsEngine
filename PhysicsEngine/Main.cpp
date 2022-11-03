@@ -35,6 +35,7 @@ ID2D1SolidColorBrush* pBrush = NULL;
 #include "Scene.h"
 #include "TestScene.h"
 #include "BallRollScene.h"
+#include "AABBBoxScene.h"
 
 
 
@@ -218,8 +219,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		Renderer renderer;
 		TestScene scene(&renderer);
 		BallRollScene brs(&renderer);
+		AABBBoxScene boxScene(&renderer);
 		scene.setup();
 		brs.setup();
+		boxScene.setup();
 
 		//setup text rendering
 		IDWriteTextFormat* d2d_text_format;

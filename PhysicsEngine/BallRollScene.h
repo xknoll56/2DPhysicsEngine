@@ -19,8 +19,7 @@ public:
 		boxCollider.halfExtents = { 7.5f, 0.1f };
 		boxCollider.angle = 3.14159f / 5.0f;
 		boxCollider1.halfExtents = { 7.5f, 0.1f };
-		boxCollider1.setAABBHalfExtents();
-		boxCollider.setAABBHalfExtents();
+		boxCollider1.setAABB();
 		boxCollider1.angle = -3.14159f / 5.0f;
 		boxCollider1.position = { -10, -20 };
 		world.boxColliders.push_back(&boxCollider);

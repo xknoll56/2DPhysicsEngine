@@ -99,6 +99,11 @@ enum BoxSide
 struct BoxCollider : Collider
 {
 	Vec2 halfExtents;
+	//Vec2 topRightCorner;
+	//Vec2 bottomLeftCorner;
+	//Vec2 topLeftCorner;
+	//Vec2 bottomRightCorner;
+
 
 	BoxCollider()
 	{
@@ -114,8 +119,44 @@ struct BoxCollider : Collider
 		aabb.halfExtents = { fmaxf(halfExtents.x, halfExtents.y), fmaxf(halfExtents.x, halfExtents.y) };
 	}
 
-	void setAABBHalfExtents()
+	void transformVertices()
 	{
-		aabb.halfExtents = { fmaxf(halfExtents.x, halfExtents.y), fmaxf(halfExtents.x, halfExtents.y) };
+
+	}
+
+	void setAABB()
+	{
+		Vec2 topRightCorner = Rotate(halfExtents, angle);
+		Vec2 bottomLeftCorner = Rotate(-halfExtents, angle);
+		Vec2 topLeftCorner = Rotate({ -halfExtents.x, halfExtents.y }, angle);
+		Vec2 bottomRightCorner = Rotate({ halfExtents.x, -halfExtents.y }, angle);
+
+		if (topRightCorner.x >= topLeftCorner.x)
+		{
+			//the angle is less than abs(90) degrees
+			if (topRightCorner.y >= topLeftCorner.y)
+			{
+				//angle>0
+				aabb.halfExtents = { bottomRightCorner.x, topRightCorner.y };
+			}
+			else
+			{
+				//angle<0
+				aabb.halfExtents = { topRightCorner.x,topLeftCorner.y };
+			}
+		}
+		else
+		{
+			if (bottomRightCorner.y >= bottomLeftCorner.y)
+			{
+				aabb.halfExtents = { bottomLeftCorner.x,bottomRightCorner.y };
+			}
+			else
+			{
+				aabb.halfExtents = { topLeftCorner.x, bottomLeftCorner.y };
+			}
+		}
+
+		Collider::setAABB();
 	}
 };

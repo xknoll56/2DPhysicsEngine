@@ -131,6 +131,7 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABBBoxScene.h" />
     <ClInclude Include="BallRollScene.h" />
     <ClInclude Include="Collider.h" />
     <ClInclude Include="SquareSpace.h" />

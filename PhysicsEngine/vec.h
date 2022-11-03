@@ -56,7 +56,7 @@ struct Vec2
 		return other.x == x && other.y == y;
 	}
 
-	Vec2 operator-()
+	Vec2 operator-() const
 	{
 		Vec2 ret;
 		ret.x = -this->x;
@@ -106,6 +106,14 @@ float Cross(Vec2 a, Vec2 b)
 Vec2 Tangent(Vec2 a)
 {
 	return Vec2{ -a.y, a.x };
+}
+
+Vec2 Rotate(const Vec2& a, float theta)
+{
+	float cTheta = cosf(theta);
+	float sTheta = sinf(theta);
+
+	return Vec2{ a.x * cTheta - a.y * sTheta, a.x * sTheta + a.y * cTheta };
 }
 
 struct RGBA

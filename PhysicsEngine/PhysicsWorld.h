@@ -162,7 +162,6 @@ struct PhysicsWorld
 		return doesHit;
 	}
 
-
 	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b, ContactInfo& ci)
 	{
 		Vec2 right = a.getLocalX();
