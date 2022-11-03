@@ -2,12 +2,12 @@
 
 struct AABB
 {
-	vec2 halfExtents;
-	vec2 center;
-	vec2 bottomLeftExtent;
-	vec2 topRightExtent;
-	vec2 topLeftExtent;
-	vec2 bottomRightExtent;
+	Vec2 halfExtents;
+	Vec2 center;
+	Vec2 bottomLeftExtent;
+	Vec2 topRightExtent;
+	Vec2 topLeftExtent;
+	Vec2 bottomRightExtent;
 	bool isOutside = false;
 
 
@@ -16,19 +16,19 @@ struct AABB
 		halfExtents = { 0.5f,0.5f };
 		center = { 0.0f, 0.0f };
 	}
-	AABB(vec2 halfExtents, vec2 center)
+	AABB(Vec2 halfExtents, Vec2 center)
 	{
 		this->halfExtents = halfExtents;
 		this->center = center;
 	}
 
-	AABB(vec2 bottomLeftExtent, vec2 topRightExtent, vec2 halfExtents)
+	AABB(Vec2 bottomLeftExtent, Vec2 topRightExtent, Vec2 halfExtents)
 	{
 		this->bottomLeftExtent = bottomLeftExtent;
 		this->topRightExtent = topRightExtent;
 		this->halfExtents = halfExtents;
-		this->topLeftExtent = vec2{ bottomLeftExtent.x, bottomLeftExtent.y + 2 * halfExtents.y };
-		this->bottomRightExtent = vec2{ topRightExtent.x, topRightExtent.y - 2 * halfExtents.y };
+		this->topLeftExtent = Vec2{ bottomLeftExtent.x, bottomLeftExtent.y + 2 * halfExtents.y };
+		this->bottomRightExtent = Vec2{ topRightExtent.x, topRightExtent.y - 2 * halfExtents.y };
 		center = bottomLeftExtent + topRightExtent;
 		center.x *= 0.5f;
 		center.y *= 0.5f;
@@ -39,8 +39,8 @@ struct AABB
 	{
 		bottomLeftExtent = center - halfExtents;
 		topRightExtent = center + halfExtents;
-		topLeftExtent = vec2{ bottomLeftExtent.x, bottomLeftExtent.y + 2 * halfExtents.y };
-		bottomRightExtent = vec2{ topRightExtent.x, topRightExtent.y - 2 * halfExtents.y };
+		topLeftExtent = Vec2{ bottomLeftExtent.x, bottomLeftExtent.y + 2 * halfExtents.y };
+		bottomRightExtent = Vec2{ topRightExtent.x, topRightExtent.y - 2 * halfExtents.y };
 	}
 };
 
@@ -98,7 +98,7 @@ enum BoxSide
 };
 struct BoxCollider : Collider
 {
-	vec2 halfExtents;
+	Vec2 halfExtents;
 
 	BoxCollider()
 	{
@@ -107,7 +107,7 @@ struct BoxCollider : Collider
 		aabb.halfExtents = { 0.5f, 0.5f };
 	}
 
-	BoxCollider(vec2 halfExtents)
+	BoxCollider(Vec2 halfExtents)
 	{
 		this->halfExtents = halfExtents;
 		type = ColliderType::BOX;

@@ -10,9 +10,9 @@ public:
 
 
 	float camWidth = 20;
-	vec2 camPos;
+	Vec2 camPos;
 
-	void drawBox(vec2 position, vec2 scale, float angle, RGBA color)
+	void drawBox(Vec2 position, Vec2 scale, float angle, RGBA color)
 	{
 		pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
 		float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
@@ -24,7 +24,7 @@ public:
 		pRT->FillRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
 	}
 
-	void drawBox(vec2 position, vec2 scale, float angle, bool fill, RGBA color)
+	void drawBox(Vec2 position, Vec2 scale, float angle, bool fill, RGBA color)
 	{
 		pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
 		float modifiedScale = 0.5f * (float)SCREEN_WIDTH / camWidth;
@@ -39,20 +39,20 @@ public:
 			pRT->DrawRectangle(D2D1::RectF(-modifiedScale, -modifiedScale, modifiedScale, modifiedScale), pBrush);
 	}
 
-	void drawLine(vec2 position1, vec2 position2, float yScale, bool fill, RGBA color)
+	void drawLine(Vec2 position1, Vec2 position2, float yScale, bool fill, RGBA color)
 	{
-		vec2 dp = position2 - position1;
+		Vec2 dp = position2 - position1;
 		float len = dp.mag() * 0.5f;
 		dp.normalize();
 
-		vec2 mid = (position2 + position1) * 0.5f;
+		Vec2 mid = (position2 + position1) * 0.5f;
 		float theta = atanf(-dp.y / dp.x) * 57.29577f;
 		drawBox(mid, { len, yScale }, theta, color);
 
 	}
 
 
-	void drawCircle(vec2 pos, float radius, float angle, RGBA color, bool doDrawLine)
+	void drawCircle(Vec2 pos, float radius, float angle, RGBA color, bool doDrawLine)
 	{
 		pBrush->SetColor(D2D1::ColorF(color.r, color.g, color.b, color.a));
 		float modifiedScale = radius / camWidth;
@@ -64,24 +64,24 @@ public:
 
 		if (doDrawLine)
 		{
-			vec2 dest = pos;
+			Vec2 dest = pos;
 			pos += {radius* cosf(0.01745 * angle), radius* sinf(-0.01745 * angle)};
 			drawLine(pos, dest, 0.025f, true, { 0.0f,1.0f,0.0f,1.0f });
 		}
 
 	}
 
-	void drawCapsule(vec2 pos, float radius, float height, float angle, RGBA color)
+	void drawCapsule(Vec2 pos, float radius, float height, float angle, RGBA color)
 	{
 		angle = -angle;
-		vec2 p1 = pos;
-		vec2 p2 = pos;
+		Vec2 p1 = pos;
+		Vec2 p2 = pos;
 		p1 += {sinf(angle)* height, cosf(angle)* height};
 		p2 += {-sinf(angle)* height, -cosf(angle)* height};
 		drawCircle(p1, radius, angle, color, false);
 		drawCircle(p2, radius, -angle, color, false);
 		drawLine(p1, p2, radius, true, color);
-		vec2 dest = p1;
+		Vec2 dest = p1;
 		p1 += {radius* cosf(angle), radius* sinf(-angle)};
 		drawLine(p1, dest, 0.025f, true, { 0.0f,1.0f,0.0f,1.0f });
 	}
@@ -98,10 +98,10 @@ public:
 		drawCircle(cc->position, cc->radius, -57.2957795f * cc->angle, color, true);
 	}
 
-	void drawUnitDirs(const vec2& position, const float& angle)
+	void drawUnitDirs(const Vec2& position, const float& angle)
 	{
-		vec2 right = { cosf(angle), sinf(angle) };
-		vec2 up = { -sinf(angle), cosf(angle) };
+		Vec2 right = { cosf(angle), sinf(angle) };
+		Vec2 up = { -sinf(angle), cosf(angle) };
 		drawLine(position, position + right, 0.025f, true, { 0,0,1,1 });
 		drawLine(position, position + up, 0.025f, true, { 1,0,0,1 });
 	}

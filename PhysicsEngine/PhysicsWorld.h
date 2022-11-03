@@ -2,15 +2,15 @@
 
 struct RayCastHit
 {
-	vec2 position;
-	vec2 normal;
+	Vec2 position;
+	Vec2 normal;
 	float dist;
 };
 
 struct ContactInfo
 {
-	std::vector<vec2> points;
-	vec2 normal;
+	std::vector<Vec2> points;
+	Vec2 normal;
 	float penetration;
 	Collider* a;
 	Collider* b;
@@ -32,16 +32,16 @@ struct PhysicsWorld
 
 	}
 
-	PhysicsWorld(int divisionsX, int divisionsY, vec2 bottomLeftExtent, float farRightExtent)
+	PhysicsWorld(int divisionsX, int divisionsY, Vec2 bottomLeftExtent, float farRightExtent)
 	{
 		
 	}
 
-	bool circleRayCast(vec2 position, vec2 direction, const CircleCollider& cc, RayCastHit& rch)
+	bool circleRayCast(Vec2 position, Vec2 direction, const CircleCollider& cc, RayCastHit& rch)
 	{
 		direction.normalize();
-		vec2 dirPerp = { -direction.y, direction.x };
-		vec2 dp = cc.position - position;
+		Vec2 dirPerp = { -direction.y, direction.x };
+		Vec2 dp = cc.position - position;
 
 		if (dp.mag() > cc.radius)
 		{
@@ -69,7 +69,7 @@ struct PhysicsWorld
 	//r direction of point 1
 	//q point 2
 	//s direction of point 2
-	bool lineLineIntersection(vec2& intersection, vec2 p, vec2 r, vec2 q, vec2 s)
+	bool lineLineIntersection(Vec2& intersection, Vec2 p, Vec2 r, Vec2 q, Vec2 s)
 	{
 		float denom = Cross(r, s);
 		if (denom == std::numeric_limits<float>::infinity())
@@ -83,21 +83,21 @@ struct PhysicsWorld
 		return false;
 	}
 
-	bool boxRayCast(vec2 position, vec2 direction, const BoxCollider& bc, RayCastHit& rch)
+	bool boxRayCast(Vec2 position, Vec2 direction, const BoxCollider& bc, RayCastHit& rch)
 	{
 		bool doesHit = false;
 		direction.normalize();
-		vec2 right = bc.getLocalX();
-		vec2 up = bc.getLocalY();
+		Vec2 right = bc.getLocalX();
+		Vec2 up = bc.getLocalY();
 		float minDist = std::numeric_limits<float>::infinity();
 
-		vec2 bottomLeftPos = bc.position + -bc.halfExtents.x * right - bc.halfExtents.y * up;
-		vec2 topRightPos = bc.position + bc.halfExtents.x * right + bc.halfExtents.y * up;
+		Vec2 bottomLeftPos = bc.position + -bc.halfExtents.x * right - bc.halfExtents.y * up;
+		Vec2 topRightPos = bc.position + bc.halfExtents.x * right + bc.halfExtents.y * up;
 
-		vec2 intersection;
+		Vec2 intersection;
 		if (lineLineIntersection(intersection, position, direction, bottomLeftPos, up))
 		{
-			vec2 pointOnLine = intersection - bottomLeftPos;
+			Vec2 pointOnLine = intersection - bottomLeftPos;
 			if (pointOnLine.mag() <= bc.halfExtents.y * 2.0f)
 			{
 				minDist = (intersection - position).mag();
@@ -110,7 +110,7 @@ struct PhysicsWorld
 
 		if (lineLineIntersection(intersection, position, direction, bottomLeftPos, right))
 		{
-			vec2 pointOnLine = intersection - bottomLeftPos;
+			Vec2 pointOnLine = intersection - bottomLeftPos;
 			if (pointOnLine.mag() <= bc.halfExtents.x*2.0f)
 			{
 				float dist = (intersection - position).mag();
@@ -127,7 +127,7 @@ struct PhysicsWorld
 
 		if (lineLineIntersection(intersection, position, direction, topRightPos, -up))
 		{
-			vec2 pointOnLine = intersection - topRightPos;
+			Vec2 pointOnLine = intersection - topRightPos;
 			if (pointOnLine.mag() <= bc.halfExtents.y * 2.0f)
 			{
 				float dist = (intersection - position).mag();
@@ -144,7 +144,7 @@ struct PhysicsWorld
 
 		if (lineLineIntersection(intersection, position, direction, topRightPos, -right))
 		{
-			vec2 pointOnLine = intersection - topRightPos;
+			Vec2 pointOnLine = intersection - topRightPos;
 			if (pointOnLine.mag() <= bc.halfExtents.x * 2.0f)
 			{
 				float dist = (intersection - position).mag();
@@ -165,9 +165,9 @@ struct PhysicsWorld
 
 	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b, ContactInfo& ci)
 	{
-		vec2 right = a.getLocalX();
-		vec2 up = a.getLocalY();
-		vec2 dp = b.position - a.position;
+		Vec2 right = a.getLocalX();
+		Vec2 up = a.getLocalY();
+		Vec2 dp = b.position - a.position;
 
 		float rightDist = (Dot(right, dp));
 		float upDist = (Dot(up, dp));
@@ -239,7 +239,7 @@ struct PhysicsWorld
 			}
 		}
 
-		vec2 closestVert = a.position + copysignf(1.0f, rightDist) * right * a.halfExtents.x + copysignf(1.0f, upDist) * up * a.halfExtents.y;
+		Vec2 closestVert = a.position + copysignf(1.0f, rightDist) * right * a.halfExtents.x + copysignf(1.0f, upDist) * up * a.halfExtents.y;
 		if ((closestVert - b.position).mag() <= b.radius)
 		{
 			//the closest vert is inside the circle
@@ -263,10 +263,10 @@ struct PhysicsWorld
 			b.position += ci.penetration * 0.5f * ci.normal;
 
 
-		vec2 ra = ci.points[0] - a.position;
-		vec2 rb = ci.points[0] - b.position;
-		vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
-		vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
+		Vec2 ra = ci.points[0] - a.position;
+		Vec2 rb = ci.points[0] - b.position;
+		Vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
+		Vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
 
 		float vRel = Dot(ci.normal, pb - pa);
 		float numerator = (1 - epsilon) * vRel;
@@ -277,15 +277,15 @@ struct PhysicsWorld
 		float t4 = rb.mag() * rb.mag() / b.inertia;
 
 		float j = numerator / (t1 + t2 + t3 + t4);
-		vec2 force = ci.normal * j *(1.0f/ dt);
+		Vec2 force = ci.normal * j *(1.0f/ dt);
 
 		a.addForce(force);
 		float torqueA = Cross(ra, force);
 		a.addTorque(torqueA);
 
 		b.addForce(-force);
-		vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
-		vec2 vt = b.velocity - vn;
+		Vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
+		Vec2 vt = b.velocity - vn;
 		float torqueB = -copysign(1.0f,Cross(vt, ci.normal))*rb.mag()*force.mag();
 		b.addTorque(torqueB);
 	}
@@ -298,10 +298,10 @@ struct PhysicsWorld
 		if (b.isDynamic)
 			b.position += ci.penetration * ci.normal;
 
-		//vec2 ra = ci.points[0] - a.position;
-		vec2 rb = ci.points[0] - b.position;
-		//vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
-		vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
+		//Vec2 ra = ci.points[0] - a.position;
+		Vec2 rb = ci.points[0] - b.position;
+		//Vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
+		Vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
 
 		float vRel = Dot(ci.normal, pb );
 		float numerator = (1 - epsilon) * vRel;
@@ -312,21 +312,21 @@ struct PhysicsWorld
 		float t4 = rb.mag() * rb.mag() / b.inertia;
 
 		float j = numerator / (t2 + t4);
-		vec2 force = ci.normal * j * (1.0f / dt);
+		Vec2 force = ci.normal * j * (1.0f / dt);
 
 
 		if (fabsf(j) > restitution)
 		{
 			b.addForce(-force);
-			vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
-			vec2 vt = b.velocity - vn;
+			Vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
+			Vec2 vt = b.velocity - vn;
 			float torqueB = -copysign(1.0f, Cross(vt, ci.normal)) * rb.mag() * force.mag();
 			b.addTorque(torqueB);
 		}
 		else
 		{
-			vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
-			vec2 vt = b.velocity - vn;
+			Vec2 vn = Dot(ci.normal, b.velocity) * ci.normal;
+			Vec2 vt = b.velocity - vn;
 			b.setVelocity(vt);
 			b.setAngularVelocity( ( - copysign(1.0f, Cross(vt, ci.normal)) / b.radius)* vt.mag());
 		}
@@ -334,7 +334,7 @@ struct PhysicsWorld
 
 	bool circleCircleOverlap(const CircleCollider& a, const CircleCollider& b)
 	{
-		vec2 dp = b.position - a.position;
+		Vec2 dp = b.position - a.position;
 		float length = dp.mag();
 		float penetration = a.radius + b.radius - length;
 		if (penetration > 0)
@@ -345,24 +345,24 @@ struct PhysicsWorld
 
 	void circleCircleResponse(float dt, CircleCollider& a, CircleCollider& b)
 	{
-		vec2 dp = b.position - a.position;
+		Vec2 dp = b.position - a.position;
 		float penetration = dp.mag() - (a.radius + b.radius);
 		penetration = fabsf(penetration);
 		dp.normalize();
 		a.position += dp * (-penetration * 0.5f);
 		b.position += dp * (penetration * 0.5f);
-		vec2 relMomentum = a.momentum - b.momentum;
+		Vec2 relMomentum = a.momentum - b.momentum;
 
 
 		float mag = Dot(dp, relMomentum);
 		if (mag > 0)
 		{
-			vec2 relMomentumNorm = mag * dp * restitution;
+			Vec2 relMomentumNorm = mag * dp * restitution;
 			b.addForce(relMomentumNorm *(1.0f/dt));
 			a.addForce(relMomentumNorm * (-1.0f / dt));
 		}
 
-		vec2 dpPerp = { -dp.y, dp.x };
+		Vec2 dpPerp = { -dp.y, dp.x };
 		mag = Dot(dpPerp, relMomentum);
 		if (mag > 0)
 		{

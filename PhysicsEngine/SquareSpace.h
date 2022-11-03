@@ -14,8 +14,8 @@ public:
 	int divisionsY;
 	std::vector<Square> squares;
 	Square outside;
-	vec2 bottomLeftExtent;
-	vec2 topRightExtent;
+	Vec2 bottomLeftExtent;
+	Vec2 topRightExtent;
 	float spaceError = 0.25f;
 
 
@@ -24,13 +24,13 @@ public:
 
 	}
 
-	SquareSpace(float squareSize, int divisionsX, int divisionsY, vec2 bottomLeftExtent)
+	SquareSpace(float squareSize, int divisionsX, int divisionsY, Vec2 bottomLeftExtent)
 	{
 		this->squareSize = squareSize;
 		this->divisionsX = divisionsX;
 		this->divisionsY = divisionsY;
 		this->bottomLeftExtent = bottomLeftExtent;
-		this->topRightExtent = bottomLeftExtent + vec2(divisionsX * squareSize, divisionsY * squareSize);
+		this->topRightExtent = bottomLeftExtent + Vec2(divisionsX * squareSize, divisionsY * squareSize);
 
 		squares.reserve(divisionsX * divisionsY);
 
@@ -38,9 +38,9 @@ public:
 		{
 			for (int j = 0; j < divisionsX; j++)
 			{
-				vec2 ble = bottomLeftExtent + vec2(squareSize * j, squareSize * i);
-				vec2 tre = ble + vec2(squareSize, squareSize);
-				AABB aabb(ble, tre, vec2(squareSize * 0.5f, squareSize * 0.5f));
+				Vec2 ble = bottomLeftExtent + Vec2(squareSize * j, squareSize * i);
+				Vec2 tre = ble + Vec2(squareSize, squareSize);
+				AABB aabb(ble, tre, Vec2(squareSize * 0.5f, squareSize * 0.5f));
 				Square square;
 				square.aabb = aabb;
 				squares.push_back(square);
@@ -49,18 +49,18 @@ public:
 
 	}
 
-	SquareSpace(int divisionsX, int divisionsY, vec2 bottomLeftExtent, float farRightExtent) : 
+	SquareSpace(int divisionsX, int divisionsY, Vec2 bottomLeftExtent, float farRightExtent) : 
 		SquareSpace((farRightExtent -bottomLeftExtent.x)/divisionsX, divisionsX, divisionsY, bottomLeftExtent)
 	{
 
 	}
 
 	//-1 will mean outside
-	int getContainmentSquareIndex(vec2& point)
+	int getContainmentSquareIndex(Vec2& point)
 	{
 		if (point.x < bottomLeftExtent.x || point.y < bottomLeftExtent.y || point.x > topRightExtent.x || point.y > topRightExtent.y)
 			return -1;
-		vec2 offset = point - bottomLeftExtent;
+		Vec2 offset = point - bottomLeftExtent;
 		offset.x /= squareSize;
 		offset.y /= squareSize;
 		return (int)(offset.y) * divisionsX + (int)offset.x;

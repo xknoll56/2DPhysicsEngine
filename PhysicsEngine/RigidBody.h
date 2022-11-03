@@ -4,26 +4,26 @@ struct RigidBody
 {
 	float mass;
 	float inertia;
-	vec2 position;
-	vec2 velocity;
-	vec2 momentum;
+	Vec2 position;
+	Vec2 velocity;
+	Vec2 momentum;
 	float angle;
 	float angularVelocity;
 	float angularMomentum;
 	float gravitationalConstant;
 	bool useGravity;
 	bool isDynamic;
-	std::list<vec2> forces;
+	std::list<Vec2> forces;
 	std::list<float> torques;
 
-	vec2 getLocalX() const
+	Vec2 getLocalX() const
 	{
-		return vec2{ cosf(angle), sinf(angle) };
+		return Vec2{ cosf(angle), sinf(angle) };
 	}
 
-	vec2 getLocalY() const
+	Vec2 getLocalY() const
 	{
-		return vec2{ -sinf(angle), cosf(angle) };
+		return Vec2{ -sinf(angle), cosf(angle) };
 	}
 	
 
@@ -42,7 +42,7 @@ struct RigidBody
 		useGravity = true;
 	}
 
-	void addForce(vec2 force)
+	void addForce(Vec2 force)
 	{
 		forces.push_back(force);
 	}
@@ -57,8 +57,8 @@ struct RigidBody
 		if (isDynamic)
 		{
 			if (useGravity)
-				forces.push_back(vec2{ 0,gravitationalConstant*mass });
-			for (std::list<vec2>::iterator i = forces.begin(); i != forces.end(); i++)
+				forces.push_back(Vec2{ 0,gravitationalConstant*mass });
+			for (std::list<Vec2>::iterator i = forces.begin(); i != forces.end(); i++)
 			{
 				momentum += *i * dt;
 			}
@@ -77,7 +77,7 @@ struct RigidBody
 		}
 	}
 
-	void setVelocity(vec2 velocity)
+	void setVelocity(Vec2 velocity)
 	{
 		this->momentum = velocity * mass;
 		this->velocity = velocity;

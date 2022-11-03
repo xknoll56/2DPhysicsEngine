@@ -1,17 +1,17 @@
 #pragma once
 
 #include <math.h>
-struct vec2
+struct Vec2
 {
 	float x, y;
 
-	vec2(float x, float y)
+	Vec2(float x, float y)
 	{
 		this->x = x;
 		this->y = y;
 	}
 
-	vec2()
+	Vec2()
 	{
 		x = 0.0f;
 		y = 0.0f;
@@ -37,75 +37,75 @@ struct vec2
 		}
 	}
 
-	vec2 operator+=(const vec2& a)
+	Vec2 operator+=(const Vec2& a)
 	{
 		this->x += a.x;
 		this->y += a.y;
 		return *this;
 	}
 
-	vec2 operator-=(const vec2& a)
+	Vec2 operator-=(const Vec2& a)
 	{
 		this->x -= a.x;
 		this->y -= a.y;
 		return *this;
 	}
 
-	bool operator==(const vec2& other)
+	bool operator==(const Vec2& other)
 	{
 		return other.x == x && other.y == y;
 	}
 
-	vec2 operator-()
+	Vec2 operator-()
 	{
-		vec2 ret;
+		Vec2 ret;
 		ret.x = -this->x;
 		ret.y = -this->y;
 		return ret;
 	}
 };
 
-vec2 operator+(vec2 a, vec2 b)
+Vec2 operator+(Vec2 a, Vec2 b)
 {
 	a.x += b.x;
 	a.y += b.y;
 	return a;
 }
 
-vec2 operator-(vec2 a, vec2 b)
+Vec2 operator-(Vec2 a, Vec2 b)
 {
 	a.x -= b.x;
 	a.y -= b.y;
 	return a;
 }
 
-vec2 operator*(vec2 a, float f)
+Vec2 operator*(Vec2 a, float f)
 {
 	a.x *= f;
 	a.y *= f;
 	return a;
 }
 
-vec2 operator*(float f, vec2 a)
+Vec2 operator*(float f, Vec2 a)
 {
 	a.x *= f;
 	a.y *= f;
 	return a;
 }
 
-float Dot(vec2 a, vec2 b)
+float Dot(Vec2 a, Vec2 b)
 {
 	return a.x * b.x + a.y * b.y;
 }
 
-float Cross(vec2 a, vec2 b)
+float Cross(Vec2 a, Vec2 b)
 {
 	return a.x * b.y - a.y * b.x;
 }
 
-vec2 Tangent(vec2 a)
+Vec2 Tangent(Vec2 a)
 {
-	return vec2{ -a.y, a.x };
+	return Vec2{ -a.y, a.x };
 }
 
 struct RGBA

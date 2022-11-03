@@ -47,7 +47,7 @@ public:
 
 		//renderer->drawCircleCollider(&c1, { 1,1,1,1 });
 		//RayCastHit rch;
-		//vec2 dir = { cosf(elapsedTime), sinf(elapsedTime) };
+		//Vec2 dir = { cosf(elapsedTime), sinf(elapsedTime) };
 		//if (world.boxRayCast(c1.position, dir, boxCollider, rch))
 		//{
 		//	renderer->drawLine(c1.position, rch.position, 0.05f, true, { 1,0,0,1 });
