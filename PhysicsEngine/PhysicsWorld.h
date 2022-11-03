@@ -467,6 +467,7 @@ struct PhysicsWorld
 			SquareSpace::Square& square = squareSpace->squares[i];
 			square.colliders.clear();
 		}
+		squareSpace->outside.colliders.clear();
 
 		//move all object
 		for (int i = 0; i < circleColliders.size(); i++)

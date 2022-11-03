@@ -37,7 +37,7 @@ public:
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
-		world.step(0.017);
+		world.step(dt);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 		renderer->drawBoxCollider(&boxCollider1, { 1,1,1,1 });
 		renderer->drawCircleCollider(&circleCollider, { 1,1,1,1 });
@@ -49,6 +49,8 @@ public:
 		renderer->drawBox(boxCollider1.aabb.center, boxCollider.aabb.halfExtents, 0.0f, false, { 1, 0, 0, 1 });
 		renderer->drawBox(boxCollider.aabb.center, boxCollider.aabb.halfExtents, 0.0f, false, { 1, 0, 0, 1 });
 
+
+		std::cout << 1.0f / dt << std::endl;
 		//std::list<int> sis = squareSpace->getContainmentSquareIndices(circleCollider.aabb);
 		//for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 		//{
