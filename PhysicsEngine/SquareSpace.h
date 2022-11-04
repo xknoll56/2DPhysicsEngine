@@ -58,12 +58,15 @@ public:
 	//-1 will mean outside
 	int getContainmentSquareIndex(Vec2& point)
 	{
-		if (point.x < bottomLeftExtent.x || point.y < bottomLeftExtent.y || point.x > topRightExtent.x || point.y > topRightExtent.y)
-			return -1;
+		//if (point.x < bottomLeftExtent.x || point.y < bottomLeftExtent.y || point.x > topRightExtent.x || point.y > topRightExtent.y)
+			//return -1;
 		Vec2 offset = point - bottomLeftExtent;
 		offset.x /= squareSize;
 		offset.y /= squareSize;
-		return (int)(offset.y) * divisionsX + (int)offset.x;
+		int ind = (int)(offset.y) * divisionsX + (int)offset.x;
+		if (ind<0 || ind > squares.size() - 1)
+			return -1;
+		return ind;
 	}
 
 	std::list<int> getContainmentSquareIndices(AABB& aabb)

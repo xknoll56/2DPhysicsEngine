@@ -1,4 +1,5 @@
 #pragma once
+//#include <limits>
 
 struct RayCastHit
 {
@@ -26,6 +27,8 @@ struct PhysicsWorld
 	float restitution = 0.4f;
 	float epsilon = 0.5f;
 	float friction = 0.3f;
+	float restingContactThreshold = 0.15f;
+	float sleepAngleThreshold = 0.999f;
 	bool useGravity = true;
 	SquareSpace* squareSpace;
 
@@ -39,6 +42,41 @@ struct PhysicsWorld
 		squareSpace = new SquareSpace(divisionsX, divisionsY, bottomLeftExtent, farRightExtent);
 	}
 
+	void setSquareSpace(float squareSize)
+	{
+		Vec2 bottomLeftExtent = { FLT_MAX, FLT_MAX };
+		Vec2 topRightExtent = { -FLT_MAX, -FLT_MAX };
+		for (int i = 0; i < circleColliders.size(); i++)
+		{
+			circleColliders[i]->setAABB();
+			if (circleColliders[i]->aabb.bottomLeftExtent.x < bottomLeftExtent.x)
+				bottomLeftExtent.x = circleColliders[i]->aabb.bottomLeftExtent.x;
+			if (circleColliders[i]->aabb.bottomLeftExtent.y < bottomLeftExtent.y)
+				bottomLeftExtent.y = circleColliders[i]->aabb.bottomLeftExtent.y;
+			if (circleColliders[i]->aabb.topRightExtent.x > topRightExtent.x)
+				topRightExtent.x = circleColliders[i]->aabb.topRightExtent.x;
+			if (circleColliders[i]->aabb.topRightExtent.y > topRightExtent.y)
+				topRightExtent.y = circleColliders[i]->aabb.topRightExtent.y;
+		}
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			boxColliders[i]->setAABB();
+			if (boxColliders[i]->aabb.bottomLeftExtent.x < bottomLeftExtent.x)
+				bottomLeftExtent.x = boxColliders[i]->aabb.bottomLeftExtent.x;
+			if(boxColliders[i]->aabb.bottomLeftExtent.y < bottomLeftExtent.y)
+				bottomLeftExtent.y = boxColliders[i]->aabb.bottomLeftExtent.y;
+			if (boxColliders[i]->aabb.topRightExtent.x > topRightExtent.x)
+				topRightExtent.x = boxColliders[i]->aabb.topRightExtent.x;
+			if (boxColliders[i]->aabb.topRightExtent.y > topRightExtent.y)
+				topRightExtent.y = boxColliders[i]->aabb.topRightExtent.y;
+		}
+
+		int divisionsX = (topRightExtent.x - bottomLeftExtent.x) / squareSize;
+		divisionsX += 1;
+		int divisionsY = (topRightExtent.y - bottomLeftExtent.y) / squareSize;
+		divisionsY += 1;
+		squareSpace = new SquareSpace(squareSize, divisionsX, divisionsY, bottomLeftExtent);
+	}
 
 	bool circleRayCast(Vec2 position, Vec2 direction, const CircleCollider& cc, RayCastHit& rch)
 	{
@@ -254,7 +292,6 @@ struct PhysicsWorld
 
 		return false;
 	}
-
 
 	bool boxBoxOverlap(BoxCollider& a, BoxCollider& b, ContactInfo& ci)
 	{
@@ -492,7 +529,7 @@ struct PhysicsWorld
 			float j = numerator / (t1 + t2);
 			if (!dynamicBox.resingContact)
 			{
-				if (fabsf(j) < 0.3f && fabsf(Dot(ci.normal, { 0,1 })) > 0.7f)
+				if (fabsf(j) < restingContactThreshold && Dot(ci.normal, { 0,1 }) > 0.0f)
 				{
 					dynamicBox.resingContact = true;
 				}
@@ -512,7 +549,7 @@ struct PhysicsWorld
 				Vec2 right = dynamicBox.getLocalX();
 				Vec2 up = dynamicBox.getLocalY();
 
-				if (fabsf(Dot(right, ci.normal)) > 0.999f)
+				if (fabsf(Dot(right, ci.normal)) > sleepAngleThreshold)
 				{
 					dynamicBox.asleep = true;
 					dynamicBox.resingContact = false;
@@ -525,7 +562,7 @@ struct PhysicsWorld
 					//	dynamicBox.setAngleFromRight(-ci.normal);
 					//}
 				}
-				else if (fabsf(Dot(up, ci.normal)) > 0.999f)
+				else if (fabsf(Dot(up, ci.normal)) > sleepAngleThreshold)
 				{
 					dynamicBox.asleep = true;
 					dynamicBox.resingContact = false;

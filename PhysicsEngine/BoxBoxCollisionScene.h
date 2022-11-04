@@ -16,7 +16,7 @@ public:
 	{
 		//boxCollider.angularMomentum = 1;
 		boxCollider.halfExtents = { 7.5f, 0.5f };
-		//boxCollider.angle = 3.14159f / 5.0f;
+		boxCollider.angle = 3.14159f / 5.0f;
 		boxCollider1.halfExtents = { 0.5, 0.5f };
 		boxCollider1.setAABB();
 		boxCollider1.angle = -3.14159f / 5.0f;
@@ -30,15 +30,16 @@ public:
 		//boxCollider.angularMomentum = 1.0f;
 		boxCollider.isDynamic = false;
 		//boxCollider1.isDynamic = false;
-		squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
-		world.squareSpace = squareSpace;
+		//squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
+		//world.squareSpace = squareSpace;
+		world.setSquareSpace(5.0f);
 	}
 
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
 		world.step(dt);
-		drawSquareSpace(*squareSpace);
+		drawSquareSpace(*world.squareSpace);
 		boxCollider1.setAABB();
 		renderer->drawAABB(boxCollider1.aabb, RGBA::RED);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
