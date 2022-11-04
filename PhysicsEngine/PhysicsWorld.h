@@ -665,12 +665,35 @@ struct PhysicsWorld
 
 			}
 		}
+
+		//handle all box box collider collisions
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			for (int j = 0; j < boxColliders.size(); j++)
+			{
+				if (i != j)
+				{
+					BoxCollider* a = boxColliders[i];
+					BoxCollider* b = boxColliders[j];
+					ContactInfo ci;
+					ci.a = a;
+					ci.b = b;
+					if (boxBoxOverlap(*a, *b, ci))
+					{
+						if (!containsPair(boxColliderPairs, a, b))
+							boxColliderPairs.push_back(ci);
+					}
+				}
+			}
+		}
 	}
 
 	void step(float dt)
 	{
 		circleBoxColliderPairs.clear();
 		circleColliderPairs.clear();
+		boxColliderPairs.clear();
+
 		//clear all squares colliders
 		for (int i = 0; i < squareSpace->squares.size(); i++)
 		{
@@ -747,6 +770,16 @@ struct PhysicsWorld
 				boxCircleResponse(circleBoxColliderPairs[k], dt);
 			else if (!a.isDynamic && b.isDynamic)
 				staticBoxDynamiCircleResponse(circleBoxColliderPairs[k], dt);
+		}
+
+		for (int k = 0; k < boxColliderPairs.size(); k++)
+		{
+			BoxCollider& a = *static_cast<BoxCollider*>(boxColliderPairs[k].a);
+			BoxCollider& b = *static_cast<BoxCollider*>(boxColliderPairs[k].b);
+			if (a.isDynamic && b.isDynamic)
+				boxBoxResponse(a, b, boxColliderPairs[k], dt);
+			else if (!a.isDynamic && b.isDynamic)
+				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
 		}
 	}
 

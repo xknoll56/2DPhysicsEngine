@@ -15,6 +15,7 @@ struct RigidBody
 	bool isDynamic;
 	bool asleep;
 	bool resingContact;
+	bool lockRotation;
 	std::list<Vec2> forces;
 	std::list<float> torques;
 
@@ -56,6 +57,7 @@ struct RigidBody
 		useGravity = true;
 		asleep = false;
 		resingContact = false;
+		lockRotation = false;
 	}
 
 	void addForce(Vec2 force)
@@ -95,7 +97,8 @@ struct RigidBody
 			angularVelocity = angularMomentum / inertia;
 
 			position += velocity * dt;
-			angle += angularVelocity * dt;
+			if(!lockRotation)
+				angle += angularVelocity * dt;
 		}
 	}
 

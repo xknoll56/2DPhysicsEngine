@@ -23,20 +23,24 @@ public:
 		boxCollider1.position = { 0, 10 };
 		boxCollider1.momentum = { 0.2, 0 };
 		boxCollider1.angularMomentum = 1;
+		//boxCollider1.lockRotation = true;
 		world.boxColliders.push_back(&boxCollider);
 		world.boxColliders.push_back(&boxCollider1);
 		world.useGravity = true;
 		//boxCollider.angularMomentum = 1.0f;
 		boxCollider.isDynamic = false;
 		//boxCollider1.isDynamic = false;
-		//squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
-		//world.squareSpace = squareSpace;
+		squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
+		world.squareSpace = squareSpace;
 	}
 
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
-		world.stepAll(dt);
+		world.step(dt);
+		drawSquareSpace(*squareSpace);
+		boxCollider1.setAABB();
+		renderer->drawAABB(boxCollider1.aabb, RGBA::RED);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 
 		//boxCollider1.setVelocity({ 0,0 });
