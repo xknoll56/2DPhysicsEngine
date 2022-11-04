@@ -58,8 +58,8 @@ public:
 	//-1 will mean outside
 	int getContainmentSquareIndex(Vec2& point)
 	{
-		//if (point.x < bottomLeftExtent.x || point.y < bottomLeftExtent.y || point.x > topRightExtent.x || point.y > topRightExtent.y)
-			//return -1;
+		if (point.x < bottomLeftExtent.x || point.y < bottomLeftExtent.y || point.x > topRightExtent.x || point.y > topRightExtent.y)
+			return -1;
 		Vec2 offset = point - bottomLeftExtent;
 		offset.x /= squareSize;
 		offset.y /= squareSize;
