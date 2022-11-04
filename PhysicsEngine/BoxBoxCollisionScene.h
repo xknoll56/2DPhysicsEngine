@@ -16,17 +16,18 @@ public:
 	{
 		//boxCollider.angularMomentum = 1;
 		boxCollider.halfExtents = { 7.5f, 0.5f };
-		boxCollider.angle = 3.14159f / 5.0f;
+		//boxCollider.angle = 3.14159f / 5.0f;
 		boxCollider1.halfExtents = { 0.5, 0.5f };
 		boxCollider1.setAABB();
 		boxCollider1.angle = -3.14159f / 5.0f;
-		boxCollider1.position = { 0, -8 };
-		boxCollider1.angularMomentum = 1;
+		boxCollider1.position = { 0, 10 };
+		boxCollider1.momentum = { 0.2, 0 };
+		//boxCollider1.angularMomentum = 1;
 		world.boxColliders.push_back(&boxCollider);
 		world.boxColliders.push_back(&boxCollider1);
-		world.useGravity = false;
+		world.useGravity = true;
 		//boxCollider.angularMomentum = 1.0f;
-		//boxCollider.isDynamic = false;
+		boxCollider.isDynamic = false;
 		//boxCollider1.isDynamic = false;
 		//squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
 		//world.squareSpace = squareSpace;
@@ -38,15 +39,15 @@ public:
 		world.stepAll(dt);
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 
-		boxCollider1.setVelocity({ 0,0 });
-		if (keys[KEY_I])
-			boxCollider1.setVelocity({ 0, 3 });
-		if (keys[KEY_J])
-			boxCollider1.setVelocity({ -3, 0 });
-		if (keys[KEY_K])
-			boxCollider1.setVelocity({ 0, -3 });
-		if (keys[KEY_L])
-			boxCollider1.setVelocity({ 3, 0 });
+		//boxCollider1.setVelocity({ 0,0 });
+		//if (keys[KEY_I])
+		//	boxCollider1.setVelocity({ 0, 3 });
+		//if (keys[KEY_J])
+		//	boxCollider1.setVelocity({ -3, 0 });
+		//if (keys[KEY_K])
+		//	boxCollider1.setVelocity({ 0, -3 });
+		//if (keys[KEY_L])
+		//	boxCollider1.setVelocity({ 3, 0 });
 
 		ContactInfo ci;
 		RayCastHit rch;

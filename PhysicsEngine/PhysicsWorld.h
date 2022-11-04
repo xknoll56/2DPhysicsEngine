@@ -22,6 +22,7 @@ struct PhysicsWorld
 	std::vector<CircleCollider*> circleColliders;
 	std::vector<ContactInfo> circleColliderPairs;
 	std::vector<ContactInfo> circleBoxColliderPairs;
+	std::vector<ContactInfo> boxColliderPairs;
 	float restitution = 0.4f;
 	float epsilon = 0.5f;
 	bool useGravity = true;
@@ -253,10 +254,6 @@ struct PhysicsWorld
 		return false;
 	}
 
-	void getBoxBoxContactPoints(const BoxCollider& a, const BoxCollider& b, ContactInfo& ci)
-	{
-
-	}
 
 	bool boxBoxOverlap(BoxCollider& a, BoxCollider& b, ContactInfo& ci)
 	{
@@ -357,6 +354,41 @@ struct PhysicsWorld
 			ci.points.push_back(a.bottomRightCorner);
 
 		return true;
+	}
+
+	void boxBoxResponse(BoxCollider& a, BoxCollider& b, ContactInfo& ci, float dt)
+	{
+		if (a.isDynamic)
+			a.position += ci.penetration * 0.5f * ci.normal;
+		if (b.isDynamic)
+			b.position -= ci.penetration * 0.5f * ci.normal;
+
+		for (int i = 0; i < ci.points.size(); i++)
+		{
+			Vec2 ra = ci.points[i] - a.position;
+			Vec2 rb = ci.points[i] - b.position;
+			Vec2 pa = a.velocity + a.angularVelocity * Tangent(ra);
+			Vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
+
+			float vRel = Dot(ci.normal, pb - pa);
+			float numerator = (1 - 0.35f) * vRel;
+
+			float t1 = 1 / a.mass;
+			float t2 = 1 / b.mass;
+			float t3 = ra.mag() * ra.mag() / a.inertia;
+			float t4 = rb.mag() * rb.mag() / b.inertia;
+
+			float j = numerator / (t1 + t2 + t3 + t4);
+			Vec2 force = ci.normal * j * (1.0f /(ci.points.size() * dt));
+
+			a.addForce(force);
+			float torqueA = Cross(ra, force);
+			a.addTorque(torqueA);
+
+			b.addForce(-force);
+			float torqueB = Cross(rb, -force);
+			b.addTorque(torqueB);
+		}
 	}
 
 	void boxCircleResponse(ContactInfo& ci, float dt)
@@ -660,9 +692,6 @@ struct PhysicsWorld
 			boxColliders[i]->step(dt);
 		}
 
-		circleColliderPairs.clear();
-		circleBoxColliderPairs.clear();
-
 		//handle all circle circle collision
 		for (int i = 0; i < circleColliders.size(); i++)
 		{
@@ -680,20 +709,8 @@ struct PhysicsWorld
 
 						//if the circles overlap, see if the pair is already found and
 						//if not add it to the vector/list
-						bool pairFound = false;
-						for (int k = 0; k < circleColliderPairs.size(); k++)
-						{
-							if ((circleColliderPairs[k].a == a && circleColliderPairs[k].b == b) || circleColliderPairs[k].a == b && circleColliderPairs[k].b == a)
-							{
-								pairFound = true;
-								break;
-							}
-						}
-
-						if (!pairFound)
-						{
+						if (!containsPair(circleColliderPairs, a, b))
 							circleColliderPairs.push_back(ci);
-						}
 					}
 				}
 			}
@@ -717,6 +734,27 @@ struct PhysicsWorld
 			}
 		}
 
+		//handle all box box collider collisions
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			for (int j = 0; j < boxColliders.size(); j++)
+			{
+				if (i != j)
+				{
+					BoxCollider* a = boxColliders[i];
+					BoxCollider* b = boxColliders[j];
+					ContactInfo ci;
+					ci.a = a;
+					ci.b = b;
+					if (boxBoxOverlap(*a, *b, ci))
+					{
+						if(!containsPair(boxColliderPairs, a, b))
+							boxColliderPairs.push_back(ci);
+					}
+				}
+			}
+		}
+
 		//handle the collisions
 		for (int k = 0; k < circleColliderPairs.size(); k++)
 		{
@@ -734,5 +772,16 @@ struct PhysicsWorld
 			else if (!a.isDynamic && b.isDynamic)
 				staticBoxDynamiCircleResponse(circleBoxColliderPairs[k], dt);
 		}
+
+		for (int k = 0; k < boxColliderPairs.size(); k++)
+		{
+			BoxCollider& a = *static_cast<BoxCollider*>(boxColliderPairs[k].a);
+			BoxCollider& b = *static_cast<BoxCollider*>(boxColliderPairs[k].b);
+			boxBoxResponse(a, b, boxColliderPairs[k], dt);
+		}
+
+		circleColliderPairs.clear();
+		circleBoxColliderPairs.clear();
+		boxColliderPairs.clear();
 	}
 };
