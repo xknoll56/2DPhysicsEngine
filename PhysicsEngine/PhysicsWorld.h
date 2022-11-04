@@ -25,6 +25,7 @@ struct PhysicsWorld
 	std::vector<ContactInfo> boxColliderPairs;
 	float restitution = 0.4f;
 	float epsilon = 0.5f;
+	float friction = 0.3f;
 	bool useGravity = true;
 	SquareSpace* squareSpace;
 
@@ -371,7 +372,7 @@ struct PhysicsWorld
 			Vec2 pb = b.velocity + b.angularVelocity * Tangent(rb);
 
 			float vRel = Dot(ci.normal, pb - pa);
-			float numerator = (1 - 0.35f) * vRel;
+			float numerator = (1 - epsilon) * vRel;
 
 			float t1 = 1 / a.mass;
 			float t2 = 1 / b.mass;
@@ -467,6 +468,52 @@ struct PhysicsWorld
 			Vec2 vt = b.velocity - vn;
 			b.setVelocity(vt);
 			b.setAngularVelocity( ( - copysign(1.0f, Cross(vt, ci.normal)) / b.radius)* vt.mag());
+		}
+	}
+
+	void staticBoxDynamicBoxRespons(BoxCollider& staticBox, BoxCollider& dynamicBox, ContactInfo& ci, float dt)
+	{
+		if (dynamicBox.isDynamic)
+			dynamicBox.position -= ci.penetration * ci.normal;
+
+		for (int i = 0; i < ci.points.size(); i++)
+		{
+			Vec2 rp = ci.points[i] - dynamicBox.position;
+			Vec2 vp = dynamicBox.velocity + dynamicBox.angularVelocity * Tangent(rp);
+
+			float vRel = Dot(ci.normal, vp);
+			Vec2 vn = vRel * ci.normal;
+			Vec2 vPerp = vp - vn;
+			float numerator = (1 - epsilon) * vRel;
+
+			float t1 = 1 / dynamicBox.mass;
+			float t2 = rp.mag() * rp.mag() / dynamicBox.inertia;
+
+			float j = numerator / (t1 + t2);
+			if (dynamicBox.velocity.mag()<0.5f && fabsf(dynamicBox.angularVelocity)<0.1f)
+			{
+				Vec2 right = dynamicBox.getLocalX();
+				if (fabsf(Dot(right, ci.normal)) > 0.999f)
+				{
+					dynamicBox.asleep = true;
+				}
+
+				Vec2 up = dynamicBox.getLocalY();
+				if (fabsf(Dot(up, ci.normal)) > 0.999f)
+				{
+					dynamicBox.asleep = true;
+				}
+			}
+			else
+			{
+				Vec2 force = ci.normal * j * (1.0f / (ci.points.size() * dt));
+				Vec2 frictionForce = force.mag() * friction * vPerp;
+				force += frictionForce;
+
+				dynamicBox.addForce(-force);
+				float torqueB = Cross(rp, -force);
+				dynamicBox.addTorque(torqueB);
+			}
 		}
 	}
 
@@ -777,7 +824,10 @@ struct PhysicsWorld
 		{
 			BoxCollider& a = *static_cast<BoxCollider*>(boxColliderPairs[k].a);
 			BoxCollider& b = *static_cast<BoxCollider*>(boxColliderPairs[k].b);
-			boxBoxResponse(a, b, boxColliderPairs[k], dt);
+			if(a.isDynamic && b.isDynamic)
+				boxBoxResponse(a, b, boxColliderPairs[k], dt);
+			else if (!a.isDynamic && b.isDynamic)
+				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
 		}
 
 		circleColliderPairs.clear();

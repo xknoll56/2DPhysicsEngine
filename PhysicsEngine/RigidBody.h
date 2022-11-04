@@ -13,6 +13,8 @@ struct RigidBody
 	float gravitationalConstant;
 	bool useGravity;
 	bool isDynamic;
+	bool asleep;
+	bool resingContact;
 	std::list<Vec2> forces;
 	std::list<float> torques;
 
@@ -40,6 +42,8 @@ struct RigidBody
 		gravitationalConstant = -9.81f;
 		isDynamic = true;
 		useGravity = true;
+		asleep = false;
+		resingContact = false;
 	}
 
 	void addForce(Vec2 force)
@@ -54,7 +58,7 @@ struct RigidBody
 
 	void step(float dt)
 	{
-		if (isDynamic)
+		if (isDynamic && !asleep)
 		{
 			if (useGravity)
 				forces.push_back(Vec2{ 0,gravitationalConstant*mass });

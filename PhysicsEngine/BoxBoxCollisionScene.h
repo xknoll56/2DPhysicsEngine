@@ -16,7 +16,7 @@ public:
 	{
 		//boxCollider.angularMomentum = 1;
 		boxCollider.halfExtents = { 7.5f, 0.5f };
-		//boxCollider.angle = 3.14159f / 5.0f;
+		boxCollider.angle = 3.14159f / 25.0f;
 		boxCollider1.halfExtents = { 0.5, 0.5f };
 		boxCollider1.setAABB();
 		boxCollider1.angle = -3.14159f / 5.0f;
