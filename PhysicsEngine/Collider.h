@@ -99,10 +99,12 @@ enum BoxSide
 struct BoxCollider : Collider
 {
 	Vec2 halfExtents;
-	//Vec2 topRightCorner;
-	//Vec2 bottomLeftCorner;
-	//Vec2 topLeftCorner;
-	//Vec2 bottomRightCorner;
+
+	//The names correspond to locations untransformed
+	Vec2 topRightCorner;
+	Vec2 bottomLeftCorner;
+	Vec2 topLeftCorner;
+	Vec2 bottomRightCorner;
 
 
 	BoxCollider()
@@ -121,39 +123,48 @@ struct BoxCollider : Collider
 
 	void transformVertices()
 	{
-
+		topRightCorner = position + Rotate(halfExtents, angle);
+		bottomLeftCorner = position + Rotate(-halfExtents, angle);
+		topLeftCorner = position + Rotate({ -halfExtents.x, halfExtents.y }, angle);
+		bottomRightCorner = position + Rotate({ halfExtents.x, -halfExtents.y }, angle);
 	}
+
+	//std::vector<Vec2> getClosestVerticesToDirection(const Vec2& dir)
+	//{
+	//	std::vector<Vec2> verts;
+	//	return verts;
+	//}
 
 	void setAABB()
 	{
-		Vec2 topRightCorner = Rotate(halfExtents, angle);
-		Vec2 bottomLeftCorner = Rotate(-halfExtents, angle);
-		Vec2 topLeftCorner = Rotate({ -halfExtents.x, halfExtents.y }, angle);
-		Vec2 bottomRightCorner = Rotate({ halfExtents.x, -halfExtents.y }, angle);
+		Vec2 trc = Rotate(halfExtents, angle);
+		Vec2 blc = Rotate(-halfExtents, angle);
+		Vec2 tlc = Rotate({ -halfExtents.x, halfExtents.y }, angle);
+		Vec2 brc = Rotate({ halfExtents.x, -halfExtents.y }, angle);
 
-		if (topRightCorner.x >= topLeftCorner.x)
+		if (trc.x >= tlc.x)
 		{
 			//the angle is less than abs(90) degrees
-			if (topRightCorner.y >= topLeftCorner.y)
+			if (trc.y >= tlc.y)
 			{
 				//angle>0
-				aabb.halfExtents = { bottomRightCorner.x, topRightCorner.y };
+				aabb.halfExtents = { brc.x, trc.y };
 			}
 			else
 			{
 				//angle<0
-				aabb.halfExtents = { topRightCorner.x,topLeftCorner.y };
+				aabb.halfExtents = { trc.x,tlc.y };
 			}
 		}
 		else
 		{
-			if (bottomRightCorner.y >= bottomLeftCorner.y)
+			if (brc.y >= blc.y)
 			{
-				aabb.halfExtents = { bottomLeftCorner.x,bottomRightCorner.y };
+				aabb.halfExtents = { blc.x,brc.y };
 			}
 			else
 			{
-				aabb.halfExtents = { topLeftCorner.x, bottomLeftCorner.y };
+				aabb.halfExtents = { tlc.x, blc.y };
 			}
 		}
 

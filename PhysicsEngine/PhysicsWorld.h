@@ -253,35 +253,108 @@ struct PhysicsWorld
 		return false;
 	}
 
-	bool boxBoxOverlap(const BoxCollider& a, const BoxCollider& b, ContactInfo& ci)
+	void getBoxBoxContactPoints(const BoxCollider& a, const BoxCollider& b, ContactInfo& ci)
+	{
+
+	}
+
+	bool boxBoxOverlap(BoxCollider& a, BoxCollider& b, ContactInfo& ci)
 	{
 		Vec2 ax = a.getLocalX();
 		Vec2 ay = a.getLocalY();
 		float wa = a.halfExtents.x;
 		float ha = a.halfExtents.y;
+		bool isHorizontalA = false;
+		bool isVerticalA = false;
 
 		Vec2 bx = b.getLocalX();
 		Vec2 by = b.getLocalY();
 		float wb = b.halfExtents.x;
 		float hb = b.halfExtents.y;
+		bool isHorizontalB = false;
+		bool isVerticalB = false;
 
 		Vec2 dp = b.position - a.position;
 
 		float penetration = fabsf(Dot(dp, ax)) - (wa + fabsf(Dot(wb * bx, ax)) + fabsf(Dot(hb * by, ax)));
 		if (penetration > 0.0f)
 			return false;
+		ci.penetration = penetration;
+		isHorizontalA = true;
+		
 
 		penetration = fabsf(Dot(dp, ay)) - (ha + fabsf(Dot(wb * bx, ay)) + fabsf(Dot(hb * by, ay)));
 		if (penetration > 0.0f)
 			return false;
+		if (penetration > ci.penetration)
+		{
+			ci.penetration = penetration;
+			isVerticalA= true;
+			isHorizontalA = false;
+		}
 
 		penetration = fabsf(Dot(dp, bx)) - (wb + fabsf(Dot(wa * ax, bx)) + fabsf(Dot(ha * ay, bx)));
 		if (penetration > 0.0f)
 			return false;
+		if (penetration > ci.penetration)
+		{
+			ci.penetration = penetration;
+			isHorizontalB = true;
+			isVerticalA = false;
+		}
 
 		penetration = fabsf(Dot(dp, by)) - (hb + fabsf(Dot(wa * ax, by)) + fabsf(Dot(ha * ay, by)));
 		if (penetration > 0.0f)
 			return false;
+		if (penetration > ci.penetration)
+		{
+			ci.penetration = penetration;
+			isVerticalB = true;
+			isHorizontalB = false;
+		}
+
+		//there exists a collision
+		if (isHorizontalA)
+		{ 
+			ci.normal = copysignf(1.0f, Dot(dp, ax)) * ax;
+		}
+		else if (isVerticalA)
+		{
+			ci.normal = copysignf(1.0f, Dot(dp, ay)) * ay;
+		}
+		else if (isHorizontalB)
+		{
+			ci.normal = copysignf(-1.0f, Dot(dp, bx)) * bx;
+		}
+		else if (isVerticalB)
+		{
+			ci.normal = copysignf(-1.0f, Dot(dp, by)) * by;
+		}
+
+		//get the contact points
+		b.transformVertices();
+		a.transformVertices();
+		RayCastHit hit;
+
+		//raycast from b's verts to a
+		if (boxRayCast(b.topRightCorner, ci.normal, a, hit))
+			ci.points.push_back(b.topRightCorner);
+		if (boxRayCast(b.topLeftCorner, ci.normal, a, hit))
+			ci.points.push_back(b.topLeftCorner);
+		if (boxRayCast(b.bottomLeftCorner, ci.normal, a, hit))
+			ci.points.push_back(b.bottomLeftCorner);
+		if (boxRayCast(b.bottomRightCorner, ci.normal, a, hit))
+			ci.points.push_back(b.bottomRightCorner);
+
+		//raycast from a's verts to b
+		if (boxRayCast(a.topRightCorner, -ci.normal, b, hit))
+			ci.points.push_back(a.topRightCorner);
+		if (boxRayCast(a.topLeftCorner, -ci.normal, b, hit))
+			ci.points.push_back(a.topLeftCorner);
+		if (boxRayCast(a.bottomLeftCorner, -ci.normal, b, hit))
+			ci.points.push_back(a.bottomLeftCorner);
+		if (boxRayCast(a.bottomRightCorner, -ci.normal, b, hit))
+			ci.points.push_back(a.bottomRightCorner);
 
 		return true;
 	}
