@@ -690,10 +690,6 @@ struct PhysicsWorld
 
 	void step(float dt)
 	{
-		circleBoxColliderPairs.clear();
-		circleColliderPairs.clear();
-		boxColliderPairs.clear();
-
 		//clear all squares colliders
 		for (int i = 0; i < squareSpace->squares.size(); i++)
 		{
@@ -781,6 +777,10 @@ struct PhysicsWorld
 			else if (!a.isDynamic && b.isDynamic)
 				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
 		}
+
+		circleBoxColliderPairs.clear();
+		circleColliderPairs.clear();
+		boxColliderPairs.clear();
 	}
 
 	void stepAll(float dt)

@@ -77,9 +77,9 @@ public:
 		int endInd = getContainmentSquareIndex(endPos);
 		if(endInd!=startInd)
 			indices.push_back(endInd);
-		for (float x = startPos.x; x < endPos.x; x += squareSize)
+		for (float x = startPos.x; x < (endPos.x+squareSize); x += squareSize)
 		{
-			for (float y = startPos.y; y < endPos.y; y += squareSize)
+			for (float y = startPos.y; y < (endPos.y+squareSize); y += squareSize)
 			{
 				Vec2 pos = { x, y };
 				int ind = getContainmentSquareIndex(pos);
