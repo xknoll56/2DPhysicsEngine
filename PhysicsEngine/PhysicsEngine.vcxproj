@@ -135,6 +135,7 @@
     <ClInclude Include="BallRollScene.h" />
     <ClInclude Include="BoxBoxCollisionScene.h" />
     <ClInclude Include="Collider.h" />
+    <ClInclude Include="PlatformerScene.h" />
     <ClInclude Include="SquareSpace.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="PhysicsWorld.h" />

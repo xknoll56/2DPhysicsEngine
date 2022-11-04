@@ -37,7 +37,7 @@ ID2D1SolidColorBrush* pBrush = NULL;
 #include "BallRollScene.h"
 #include "AABBBoxScene.h"
 #include "BoxBoxCollisionScene.h"
-
+#include "PlatformerScene.h"
 
 
 
@@ -222,10 +222,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		BallRollScene brs(&renderer);
 		AABBBoxScene boxScene(&renderer);
 		BoxBoxCollisionScene bbcs(&renderer);
+		PlatformerScene platformerScene(&renderer);
 		scene.setup();
 		brs.setup();
 		boxScene.setup();
 		bbcs.setup();
+		platformerScene.setup();
 
 		//setup text rendering
 		IDWriteTextFormat* d2d_text_format;
@@ -281,7 +283,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			pRT->BeginDraw();
 			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
 
-			bbcs.update(dt);
+			platformerScene.update(dt);
 
 			
 			pRT->SetTransform(identity);
