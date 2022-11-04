@@ -170,4 +170,5 @@ struct BoxCollider : Collider
 
 		Collider::setAABB();
 	}
+
 };

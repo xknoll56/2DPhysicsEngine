@@ -490,22 +490,12 @@ struct PhysicsWorld
 			float t2 = rp.mag() * rp.mag() / dynamicBox.inertia;
 
 			float j = numerator / (t1 + t2);
-			if (dynamicBox.velocity.mag()<0.5f && fabsf(dynamicBox.angularVelocity)<0.1f)
+			if (!dynamicBox.resingContact)
 			{
-				Vec2 right = dynamicBox.getLocalX();
-				if (fabsf(Dot(right, ci.normal)) > 0.999f)
+				if (fabsf(j) < 0.3f && fabsf(Dot(ci.normal, { 0,1 })) > 0.7f)
 				{
-					dynamicBox.asleep = true;
+					dynamicBox.resingContact = true;
 				}
-
-				Vec2 up = dynamicBox.getLocalY();
-				if (fabsf(Dot(up, ci.normal)) > 0.999f)
-				{
-					dynamicBox.asleep = true;
-				}
-			}
-			else
-			{
 				Vec2 force = ci.normal * j * (1.0f / (ci.points.size() * dt));
 				Vec2 frictionForce = force.mag() * friction * vPerp;
 				force += frictionForce;
@@ -513,6 +503,41 @@ struct PhysicsWorld
 				dynamicBox.addForce(-force);
 				float torqueB = Cross(rp, -force);
 				dynamicBox.addTorque(torqueB);
+			}
+			else
+			{
+				dynamicBox.addTorque(Cross(rp, dynamicBox.mass*dynamicBox.gravitationalConstant*Vec2{0,-1}));
+				Vec2 velocity = dynamicBox.angularVelocity * Tangent(-rp);
+				dynamicBox.setVelocity(velocity);
+				Vec2 right = dynamicBox.getLocalX();
+				Vec2 up = dynamicBox.getLocalY();
+
+				if (fabsf(Dot(right, ci.normal)) > 0.999f)
+				{
+					dynamicBox.asleep = true;
+					dynamicBox.resingContact = false;
+					//if (Dot(right, ci.normal) > 0.0f)
+					//{
+					//	dynamicBox.setAngleFromRight(ci.normal);
+					//}
+					//else
+					//{
+					//	dynamicBox.setAngleFromRight(-ci.normal);
+					//}
+				}
+				else if (fabsf(Dot(up, ci.normal)) > 0.999f)
+				{
+					dynamicBox.asleep = true;
+					dynamicBox.resingContact = false;
+					//if (Dot(up, ci.normal) > 0.0f)
+					//{
+					//	dynamicBox.setAngleFromUp(ci.normal);
+					//}
+					//else
+					//{
+					//	dynamicBox.setAngleFromUp(-ci.normal);
+					//}
+				}
 			}
 		}
 	}

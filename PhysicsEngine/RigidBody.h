@@ -27,6 +27,18 @@ struct RigidBody
 	{
 		return Vec2{ -sinf(angle), cosf(angle) };
 	}
+
+	void setAngleFromRight(Vec2 right)
+	{
+		//Vec2 up = Tangent(right);
+		angle = atanf(right.y / right.x);
+	}
+
+	void setAngleFromUp(Vec2 up)
+	{
+		Vec2 right = -Tangent(up);
+		angle = atanf(right.y / right.x);
+	}
 	
 
 	RigidBody()
@@ -54,6 +66,12 @@ struct RigidBody
 	void addTorque(float torque)
 	{
 		torques.push_back(torque);
+	}
+
+	void wakeUp()
+	{
+		resingContact = false;
+		asleep = false;
 	}
 
 	void step(float dt)

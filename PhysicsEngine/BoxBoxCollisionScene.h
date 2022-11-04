@@ -22,7 +22,7 @@ public:
 		boxCollider1.angle = -3.14159f / 5.0f;
 		boxCollider1.position = { 0, 10 };
 		boxCollider1.momentum = { 0.2, 0 };
-		//boxCollider1.angularMomentum = 1;
+		boxCollider1.angularMomentum = 1;
 		world.boxColliders.push_back(&boxCollider);
 		world.boxColliders.push_back(&boxCollider1);
 		world.useGravity = true;
@@ -56,6 +56,7 @@ public:
 		//	renderer->drawLine(boxCollider1.position, rch.position, 0.05f, true, RGBA::RED);
 		//else
 		//	renderer->drawLine(boxCollider1.position, boxCollider1.position+dir*100.0f, 0.05f, true, RGBA::GREEN);
+		renderer->drawUnitDirs(boxCollider1.position, boxCollider1.angle);
 		if (!world.boxBoxOverlap(boxCollider, boxCollider1, ci))
 			renderer->drawBoxCollider(&boxCollider1, RGBA::WHITE);
 		else
