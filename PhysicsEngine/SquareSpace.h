@@ -71,15 +71,11 @@ public:
 		std::list<int> indices;
 
 		Vec2 startPos = aabb.bottomLeftExtent;
-		Vec2 endPos = aabb.topRightExtent;
-		int startInd = getContainmentSquareIndex(startPos);
-		indices.push_back(startInd);
-		int endInd = getContainmentSquareIndex(endPos);
-		if(endInd!=startInd)
-			indices.push_back(endInd);
-		for (float x = startPos.x; x < (endPos.x+squareSize); x += squareSize)
+		Vec2 cutoff = aabb.topRightExtent + Vec2{squareSize, squareSize};
+
+		for (float x = startPos.x; x < cutoff.x; x += squareSize)
 		{
-			for (float y = startPos.y; y < (endPos.y+squareSize); y += squareSize)
+			for (float y = startPos.y; y < cutoff.y; y += squareSize)
 			{
 				Vec2 pos = { x, y };
 				int ind = getContainmentSquareIndex(pos);
