@@ -508,7 +508,7 @@ struct PhysicsWorld
 		}
 	}
 
-	void staticBoxDynamicBoxRespons(BoxCollider& staticBox, BoxCollider& dynamicBox, ContactInfo& ci, float dt)
+	void staticBoxDynamicBoxResponse(BoxCollider& staticBox, BoxCollider& dynamicBox, ContactInfo& ci, float dt)
 	{
 		if (dynamicBox.isDynamic)
 			dynamicBox.position -= ci.penetration * ci.normal;
@@ -529,13 +529,17 @@ struct PhysicsWorld
 			float j = numerator / (t1 + t2);
 			if (!dynamicBox.resingContact)
 			{
-				if (fabsf(j) < restingContactThreshold && Dot(ci.normal, { 0,1 }) > 0.0f)
+				if (dynamicBox.enableRestingContact && fabsf(j) < restingContactThreshold && Dot(ci.normal, { 0,1 }) > 0.0f)
 				{
 					dynamicBox.resingContact = true;
 				}
 				Vec2 force = ci.normal * j * (1.0f / (ci.points.size() * dt));
-				Vec2 frictionForce = force.mag() * friction * vPerp;
-				force += frictionForce;
+
+				if (dynamicBox.enableRestingContact)
+				{
+					Vec2 frictionForce = force.mag() * friction * vPerp;
+					force += frictionForce;
+				}
 
 				dynamicBox.addForce(-force);
 				float torqueB = Cross(rp, -force);
@@ -828,15 +832,15 @@ struct PhysicsWorld
 			else if (!a.isDynamic && b.isDynamic)
 			{
 				//boxColliderPairs[k].normal = -1.0f * boxColliderPairs[k].normal;
-				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
+				staticBoxDynamicBoxResponse(a, b, boxColliderPairs[k], dt);
 			}
-			else if (a.isDynamic && !b.isDynamic)
-			{
-				boxColliderPairs[k].a = &b;
-				boxColliderPairs[k].b = &a;
-				//boxColliderPairs[k].normal = -1.0f* boxColliderPairs[k].normal;
-				staticBoxDynamicBoxRespons(b, a, boxColliderPairs[k], dt);
-			}
+			//else if (a.isDynamic && !b.isDynamic)
+			//{
+			//	boxColliderPairs[k].a = &b;
+			//	boxColliderPairs[k].b = &a;
+			//	//boxColliderPairs[k].normal = -1.0f* boxColliderPairs[k].normal;
+			//	staticBoxDynamicBoxRespons(b, a, boxColliderPairs[k], dt);
+			//}
 		}
 
 		circleBoxColliderPairs.clear();
@@ -946,7 +950,7 @@ struct PhysicsWorld
 			if(a.isDynamic && b.isDynamic)
 				boxBoxResponse(a, b, boxColliderPairs[k], dt);
 			else if (!a.isDynamic && b.isDynamic)
-				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
+				staticBoxDynamicBoxResponse(a, b, boxColliderPairs[k], dt);
 		}
 
 		circleColliderPairs.clear();

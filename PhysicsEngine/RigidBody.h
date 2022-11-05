@@ -16,6 +16,7 @@ struct RigidBody
 	bool asleep;
 	bool resingContact;
 	bool lockRotation;
+	bool enableRestingContact;
 	std::list<Vec2> forces;
 	std::list<float> torques;
 
@@ -58,6 +59,7 @@ struct RigidBody
 		asleep = false;
 		resingContact = false;
 		lockRotation = false;
+		enableRestingContact = true;
 	}
 
 	void addForce(Vec2 force)
