@@ -8,7 +8,7 @@ struct AABB
 	Vec2 topRightExtent;
 	Vec2 topLeftExtent;
 	Vec2 bottomRightExtent;
-	bool isOutside = false;
+	//bool isOutside = false;
 
 
 	AABB()
@@ -50,10 +50,20 @@ enum ColliderType
 	BOX = 1,
 	NONE = 2
 };
+
+
+struct ContactInfo;
+
+struct CollisionObserver
+{
+	virtual void onOverlap(ContactInfo& ci) = 0;
+};
+
 struct Collider : RigidBody
 {
 	ColliderType type = ColliderType::NONE;
 	AABB aabb;
+	std::list<CollisionObserver*> callbacks;
 
 	virtual ColliderType getType()
 	{
@@ -65,7 +75,22 @@ struct Collider : RigidBody
 		aabb.center = position;
 		aabb.setExtents();
 	}
+
+	void notify(ContactInfo& ci)
+	{
+		for (std::list<CollisionObserver*>::const_iterator it = callbacks.begin(); it != callbacks.end(); it++)
+			(*it)->onOverlap(ci);
+	}
 };
+struct ContactInfo
+{
+	std::vector<Vec2> points;
+	Vec2 normal;
+	float penetration;
+	Collider* a;
+	Collider* b;
+};
+
 
 
 struct CircleCollider : Collider

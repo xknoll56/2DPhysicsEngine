@@ -8,14 +8,7 @@ struct RayCastHit
 	float dist;
 };
 
-struct ContactInfo
-{
-	std::vector<Vec2> points;
-	Vec2 normal;
-	float penetration;
-	Collider* a;
-	Collider* b;
-};
+
 
 struct PhysicsWorld
 {
@@ -203,7 +196,7 @@ struct PhysicsWorld
 		return doesHit;
 	}
 
-	bool boxCircleOverlap(const BoxCollider& a, const CircleCollider& b, ContactInfo& ci)
+	bool boxCircleOverlap(BoxCollider& a, CircleCollider& b, ContactInfo& ci)
 	{
 		Vec2 right = a.getLocalX();
 		Vec2 up = a.getLocalY();
@@ -238,6 +231,8 @@ struct PhysicsWorld
 					ci.normal = right;
 					ci.points.push_back(rch.position);
 					ci.penetration = b.radius - (rch.position - b.position).mag();
+					a.notify(ci);
+					b.notify(ci);
 					return true;
 				}
 			}
@@ -249,6 +244,8 @@ struct PhysicsWorld
 					ci.points.push_back(rch.position);
 					ci.normal = -right;
 					ci.penetration = b.radius - (rch.position - b.position).mag();
+					a.notify(ci);
+					b.notify(ci);
 					return true;
 				}
 			}
@@ -263,6 +260,8 @@ struct PhysicsWorld
 					ci.points.push_back(rch.position);
 					ci.normal = up;
 					ci.penetration = b.radius - (rch.position - b.position).mag();
+					a.notify(ci);
+					b.notify(ci);
 					return true;
 				}
 			}
@@ -274,6 +273,8 @@ struct PhysicsWorld
 					ci.points.push_back(rch.position);
 					ci.normal = -up;
 					ci.penetration = b.radius - (rch.position - b.position).mag();
+					a.notify(ci);
+					b.notify(ci);
 					return true;
 				}
 			}
@@ -287,6 +288,8 @@ struct PhysicsWorld
 			ci.normal = b.position - closestVert;
 			ci.penetration = b.radius - ci.normal.mag();
 			ci.normal.normalize();
+			a.notify(ci);
+			b.notify(ci);
 			return true;
 		}
 
@@ -391,6 +394,8 @@ struct PhysicsWorld
 		if (boxRayCast(a.bottomRightCorner, -ci.normal, b, hit))
 			ci.points.push_back(a.bottomRightCorner);
 
+		a.notify(ci);
+		b.notify(ci);
 		return true;
 	}
 

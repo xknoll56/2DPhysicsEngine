@@ -1,7 +1,7 @@
 #pragma once
 extern float elapsedTime;
 
-class PlatformerScene : Scene
+class PlatformerScene : Scene, CollisionObserver
 {
 public:
 	std::vector<BoxCollider> terrain;
@@ -24,6 +24,7 @@ public:
 		player.position = { 0, 5.0f };
 		player.lockRotation = true;
 		player.enableRestingContact = false;
+		player.callbacks.push_back(this);
 		//player.useGravity = false;
 		world.boxColliders.push_back(&player);
 
@@ -62,5 +63,10 @@ public:
 			renderer->drawBoxCollider(&bc, { 0.6,0.3,0.0,1.0f });
 
 		renderer->drawBoxCollider(&player, RGBA::BLUE);
+	}
+
+	void onOverlap(ContactInfo& ci) override
+	{
+		std::cout << ci.normal.y << std::endl;
 	}
 };
