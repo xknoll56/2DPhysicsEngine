@@ -35,7 +35,7 @@ public:
 	void update(float dt)
 	{
 		moveCamera(5.0f, dt);
-		world.stepAll(dt);
+		world.step(dt);
 		drawSquareSpace(*world.squareSpace);
 
 		for (BoxCollider& bc : terrain)

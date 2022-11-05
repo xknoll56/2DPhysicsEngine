@@ -825,11 +825,15 @@ struct PhysicsWorld
 			if (a.isDynamic && b.isDynamic)
 				boxBoxResponse(a, b, boxColliderPairs[k], dt);
 			else if (!a.isDynamic && b.isDynamic)
+			{
+				boxColliderPairs[k].normal = -1.0f * boxColliderPairs[k].normal;
 				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
+			}
 			else if (a.isDynamic && !b.isDynamic)
 			{
 				boxColliderPairs[k].a = &b;
 				boxColliderPairs[k].b = &a;
+				//boxColliderPairs[k].normal = -1.0f* boxColliderPairs[k].normal;
 				staticBoxDynamicBoxRespons(b, a, boxColliderPairs[k], dt);
 			}
 		}
