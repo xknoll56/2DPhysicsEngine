@@ -713,25 +713,26 @@ struct PhysicsWorld
 					BoxCollider* a = boxColliders[i];
 					BoxCollider* b = boxColliders[j];
 					ContactInfo ci;
-					if (!a->isDynamic)
+
+					if (!a->isDynamic && b->isDynamic)
 					{
 						ci.a = a;
 						ci.b = b;
+						if (boxBoxOverlap(*a, *b, ci))
+						{
+							if (!containsPair(boxColliderPairs, a, b))
+								boxColliderPairs.push_back(ci);
+						}
 					}
-					else if (!b->isDynamic)
+					else if (a->isDynamic && !b->isDynamic)
 					{
 						ci.a = b;
 						ci.b = a;
-					}
-					else
-					{
-						ci.a = a;
-						ci.b = b;
-					}
-					if (boxBoxOverlap(*a, *b, ci))
-					{
-						if (!containsPair(boxColliderPairs, a, b))
-							boxColliderPairs.push_back(ci);
+						if (boxBoxOverlap(*b, *a, ci))
+						{
+							if (!containsPair(boxColliderPairs, a, b))
+								boxColliderPairs.push_back(ci);
+						}
 					}
 				}
 			}
@@ -826,7 +827,7 @@ struct PhysicsWorld
 				boxBoxResponse(a, b, boxColliderPairs[k], dt);
 			else if (!a.isDynamic && b.isDynamic)
 			{
-				boxColliderPairs[k].normal = -1.0f * boxColliderPairs[k].normal;
+				//boxColliderPairs[k].normal = -1.0f * boxColliderPairs[k].normal;
 				staticBoxDynamicBoxRespons(a, b, boxColliderPairs[k], dt);
 			}
 			else if (a.isDynamic && !b.isDynamic)
