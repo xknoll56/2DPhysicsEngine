@@ -8,6 +8,7 @@ struct AABB
 	Vec2 topRightExtent;
 	Vec2 topLeftExtent;
 	Vec2 bottomRightExtent;
+	std::list<int> containmentIndices;
 	//bool isOutside = false;
 
 

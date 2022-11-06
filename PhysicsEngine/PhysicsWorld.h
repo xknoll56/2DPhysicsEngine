@@ -762,12 +762,14 @@ struct PhysicsWorld
 		for (int i = 0; i < circleColliders.size(); i++)
 		{
 			circleColliders[i]->useGravity = useGravity;
+			circleColliders[i]->aabb.containmentIndices.clear();
 			circleColliders[i]->step(dt);
 		}
 
 		for (int i = 0; i < boxColliders.size(); i++)
 		{
 			boxColliders[i]->useGravity = useGravity;
+			boxColliders[i]->aabb.containmentIndices.clear();
 			boxColliders[i]->step(dt);
 		}
 		
@@ -776,6 +778,7 @@ struct PhysicsWorld
 		{
 			circleColliders[i]->setAABB();
 			std::list<int> sis = squareSpace->getContainmentSquareIndices(circleColliders[i]->aabb);
+			circleColliders[i]->aabb.containmentIndices = sis;
 			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 			{
 				if (*it == -1)
@@ -788,6 +791,7 @@ struct PhysicsWorld
 		{
 			boxColliders[i]->setAABB();
 			std::list<int> sis = squareSpace->getContainmentSquareIndices(boxColliders[i]->aabb);
+			boxColliders[i]->aabb.containmentIndices = sis;
 			for (std::list<int>::const_iterator it = sis.begin(); it != sis.end(); it++)
 			{
 				if (*it == -1)
@@ -798,16 +802,42 @@ struct PhysicsWorld
 		}
 
 		//solve each of the squares
-		for (int i = 0; i < squareSpace->squares.size(); i++)
+		for (int i = 0; i < circleColliders.size(); i++)
 		{
-			SquareSpace::Square& square = squareSpace->squares[i];
-			if(square.colliders.size()>0)
-				stepSquare(dt, square);
+			if (circleColliders[i]->isDynamic)
+			{
+				for (std::list<int>::iterator it = circleColliders[i]->aabb.containmentIndices.begin(); it != circleColliders[i]->aabb.containmentIndices.end(); it++)
+				{
+					if (*it == -1)
+					{
+						stepSquare(dt, squareSpace->outside);
+					}
+					else
+					{
+						SquareSpace::Square& square = squareSpace->squares[*it];
+						stepSquare(dt, square);
+					}
+				}
+			}
 		}
-
-		//step the outside square
-		if(squareSpace->outside.colliders.size()>0)
-			stepSquare(dt, squareSpace->outside);
+		for (int i = 0; i < boxColliders.size(); i++)
+		{
+			if (boxColliders[i]->isDynamic)
+			{
+				for (std::list<int>::iterator it = boxColliders[i]->aabb.containmentIndices.begin(); it != boxColliders[i]->aabb.containmentIndices.end(); it++)
+				{
+					if (*it == -1)
+					{
+						stepSquare(dt, squareSpace->outside);
+					}
+					else
+					{
+						SquareSpace::Square& square = squareSpace->squares[*it];
+						stepSquare(dt, square);
+					}
+				}
+			}
+		}
 
 		//handle collsions
 				//handle the collisions

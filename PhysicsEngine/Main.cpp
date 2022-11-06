@@ -283,7 +283,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 			pRT->BeginDraw();
 			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
 
-			platformerScene.update(dt);
+			brs.update(dt);
 
 			
 			pRT->SetTransform(identity);

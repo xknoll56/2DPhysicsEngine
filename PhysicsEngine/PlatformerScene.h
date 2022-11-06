@@ -67,6 +67,6 @@ public:
 
 	void onOverlap(ContactInfo& ci) override
 	{
-		std::cout << ci.normal.y << std::endl;
+		
 	}
 };
