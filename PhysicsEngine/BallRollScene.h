@@ -7,7 +7,7 @@ public:
 	CircleCollider circleCollider;
 	BoxCollider boxCollider;
 	BoxCollider boxCollider1;
-	SquareSpace* squareSpace;
+	//SquareSpace* squareSpace;
 
 	BallRollScene(Renderer* renderer)
 	{
@@ -29,8 +29,9 @@ public:
 		world.useGravity = true;
 		boxCollider.isDynamic = false;
 		boxCollider1.isDynamic = false;
-		squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
-		world.squareSpace = squareSpace;
+		//squareSpace = new SquareSpace(5, 5, { -20,-20 }, 20);
+		//world.squareSpace = squareSpace;
+		world.setSquareSpace(5.0f);
 	}
 
 	void update(float dt)
@@ -40,7 +41,7 @@ public:
 		renderer->drawBoxCollider(&boxCollider, { 1,1,1,1 });
 		renderer->drawBoxCollider(&boxCollider1, { 1,1,1,1 });
 		renderer->drawCircleCollider(&circleCollider, { 1,1,1,1 });
-		drawSquareSpace(*squareSpace);
+		drawSquareSpace(*world.squareSpace);
 
 
 		//circleCollider.setAABB();

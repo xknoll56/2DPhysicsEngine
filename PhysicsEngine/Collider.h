@@ -66,6 +66,7 @@ struct Collider : RigidBody
 	AABB aabb;
 	std::list<CollisionObserver*> callbacks;
 
+
 	virtual ColliderType getType()
 	{
 		return type;

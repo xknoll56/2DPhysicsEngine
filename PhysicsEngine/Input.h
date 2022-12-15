@@ -9,6 +9,7 @@ static bool mouse[MOUSE_SIZE];
 static bool mouseDown[MOUSE_SIZE];
 static bool mousePresent = true;
 static int cursorCount = 0;
+static Vec2 cursorPosition;
 
 #define MOUSE_LEFT VK_LBUTTON
 #define MOUSE_MIDDLE VK_MBUTTON

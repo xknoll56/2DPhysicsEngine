@@ -7,6 +7,7 @@ public:
 	std::vector<BoxCollider> terrain;
 	//BoxCollider ground;
 	BoxCollider player;
+	bool canJump = false;
 
 	PlatformerScene(Renderer* renderer)
 	{
@@ -51,8 +52,11 @@ public:
 		Vec2 vel = { 0.0f, player.velocity.y };
 		float speed = 3.0f;
 		float jumpSpeed = 10.0f;
-		if (keysDown[VK_SPACE])
+		if (keysDown[VK_SPACE] && canJump)
+		{
 			vel += {0, jumpSpeed};
+			canJump = false;
+		}
 		if (keys[VK_LEFT])
 			vel += {-speed, 0.0f};
 		if (keys[VK_RIGHT])
@@ -65,8 +69,13 @@ public:
 		renderer->drawBoxCollider(&player, RGBA::BLUE);
 	}
 
+
 	void onOverlap(ContactInfo& ci) override
 	{
-		
+		if (Dot(ci.normal, { 0,1 }) > 0.80f)
+		{
+			player.setVelocity({ player.velocity.x,0 });
+			canJump = true;
+		}
 	}
 };

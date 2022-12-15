@@ -68,5 +68,8 @@
     <ClInclude Include="PlatformerScene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="FluidSimulationScene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

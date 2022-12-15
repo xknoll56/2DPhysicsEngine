@@ -1,4 +1,5 @@
 #pragma once
+extern Vec2 cursorPosition;
 class Scene
 {
 public:
@@ -38,5 +39,18 @@ public:
 			AABB aabb = squareSpace.squares[i].aabb;
 			renderer->drawBox(aabb.center, aabb.halfExtents, 0.0f, false, { 0,1,0,1 });
 		}
+	}
+
+	Vec2 normalizedScreenCoords()
+	{
+		return Vec2{ 2.0f * (cursorPosition.x / SCREEN_WIDTH - 0.5f), 2.0f * (0.5f - cursorPosition.y / SCREEN_HEIGHT)/(ASPECT_RATIO)};
+	}
+
+	Vec2 screenWorldCoords()
+	{
+		//std::cout << cursorPosition.x/SCREEN_WIDTH << " " << cursorPosition.y/SCREEN_HEIGHT << std::endl;
+		Vec2 norm = normalizedScreenCoords();
+		norm.y = norm.y*SCREEN_WIDTH;
+		return renderer->camPos + renderer->camWidth * normalizedScreenCoords();
 	}
 };

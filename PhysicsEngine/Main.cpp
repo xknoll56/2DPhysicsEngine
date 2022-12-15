@@ -14,6 +14,8 @@ typedef unsigned short uint16;
 
 float SCREEN_WIDTH = 1024;
 float SCREEN_HEIGHT = 576;
+#define ASPECT_RATIO SCREEN_WIDTH/SCREEN_HEIGHT
+
 #define DEBUG_BUILD
 float aspect;
 float elapsedTime;
@@ -38,6 +40,7 @@ ID2D1SolidColorBrush* pBrush = NULL;
 #include "AABBBoxScene.h"
 #include "BoxBoxCollisionScene.h"
 #include "PlatformerScene.h"
+#include "FluidSimulationScene.h"
 
 
 
@@ -223,11 +226,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 		AABBBoxScene boxScene(&renderer);
 		BoxBoxCollisionScene bbcs(&renderer);
 		PlatformerScene platformerScene(&renderer);
+		FluidSimulationScene fluidSimulationScene(&renderer);
 		scene.setup();
 		brs.setup();
 		boxScene.setup();
 		bbcs.setup();
 		platformerScene.setup();
+		fluidSimulationScene.setup();
 
 		//setup text rendering
 		IDWriteTextFormat* d2d_text_format;
@@ -280,10 +285,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPSTR /*lpC
 				DispatchMessageW(&msg);
 			}
 
+			//get cursor position
+			POINT P;
+			if (GetCursorPos(&P) && !mouse[MOUSE_RIGHT])
+			{
+				ScreenToClient(hwnd, &P);
+				if (keysDown[KEY_F])
+					std::cout << P.x << " , " << P.y << std::endl;
+				Vec2 temp = { (float)P.x, (float)P.y };
+				cursorPosition = temp;
+			}
+
 			pRT->BeginDraw();
 			pRT->Clear(D2D1::ColorF(0, 0, 0, 1));
 
-			brs.update(dt);
+			fluidSimulationScene.update(dt);
 
 			
 			pRT->SetTransform(identity);
